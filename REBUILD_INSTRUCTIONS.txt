@@ -1,0 +1,39 @@
+DOCKER REBUILD INSTRUCTIONS FOR BATCH REGISTRY FIX
+===================================================
+
+The button click handlers have been fixed in App.js.
+Since you're using Docker, you need to rebuild the frontend container.
+
+OPTION 1 - Rebuild Only Frontend (FASTER):
+-------------------------------------------
+cd c:\Users\Admin\Downloads\files (1)\agritech_fullstack_project\agritech
+docker-compose stop frontend
+docker-compose rm -f frontend
+docker-compose build frontend
+docker-compose up -d frontend
+
+OPTION 2 - Rebuild Everything (if Option 1 doesn't work):
+----------------------------------------------------------
+cd c:\Users\Admin\Downloads\files (1)\agritech_fullstack_project\agritech
+docker-compose down
+docker-compose build --no-cache frontend
+docker-compose up -d
+
+OPTION 3 - Full Clean Rebuild (if still not working):
+------------------------------------------------------
+cd c:\Users\Admin\Downloads\files (1)\agritech_fullstack_project\agritech
+docker-compose down -v
+docker-compose build --no-cache
+docker-compose up -d
+
+After rebuild, wait 30 seconds then access:
+http://localhost:3000
+
+Clear browser cache (Ctrl+Shift+Delete) if buttons still don't work.
+
+WHAT WAS FIXED:
+- Add Batch button now works
+- Analyze Image / Re-analyze buttons now work  
+- View Report (eye icon) buttons now work
+- Cancel buttons in modals now work
+- All form submissions now work properly

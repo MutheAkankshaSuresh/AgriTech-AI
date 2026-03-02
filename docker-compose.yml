@@ -1,0 +1,51 @@
+version: '3.9'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: agritech_mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: agritech_admin
+      MONGO_INITDB_ROOT_PASSWORD: AgriTech@2024
+      MONGO_INITDB_DATABASE: agritech_db
+    volumes:
+      - mongo_data:/data/db
+      - ./backend/scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: agritech_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      MONGODB_URL: mongodb://agritech_admin:AgriTech@2024@mongodb:27017/agritech_db?authSource=admin
+      DATABASE_NAME: agritech_db
+      SECRET_KEY: agritech-super-secret-jwt-key-2024
+      ML_MODELS_PATH: /app/ml_models
+    volumes:
+      - ./ml/models:/app/ml_models
+      - ./backend:/app
+    depends_on:
+      - mongodb
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: agritech_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_URL: http://localhost:8000
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:

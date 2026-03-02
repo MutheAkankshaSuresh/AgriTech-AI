@@ -1,0 +1,10 @@
+{
+  "best_val_accuracy": 0.9958333333333333,
+  "classes": [
+    "Healthy",
+    "Cracked",
+    "Discolored",
+    "Shriveled"
+  ],
+  "epochs": 30
+}

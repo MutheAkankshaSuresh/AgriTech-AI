@@ -1,0 +1,15 @@
+{
+  "best_val_mae": 2.4857000999450682,
+  "pass_fail_accuracy": 0.992,
+  "features": [
+    "moisture_percent",
+    "thousand_seed_weight_g",
+    "physical_purity_percent",
+    "storage_temperature_c",
+    "storage_humidity_percent",
+    "days_since_harvest",
+    "crop_encoded",
+    "interaction"
+  ],
+  "epochs": 80
+}

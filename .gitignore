@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+
+# Node
+node_modules/
+build/
+dist/
+
+# ML Models and Data - EXCLUDE ALL
+ml/models/*.pt
+ml/models/*.pth
+ml/models/*.pkl
+ml/data/
+ml/dataset/
+ml/runs/
+backend/ml_models/*.pt
+backend/ml_models/*.pth
+
+# Large files
+*.zip
+*.csv
+*.jpg
+*.jpeg
+*.png
+*.gif
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+backend/temp_seed.jpg
