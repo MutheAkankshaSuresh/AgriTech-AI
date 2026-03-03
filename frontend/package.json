@@ -13,7 +13,7 @@
     "react-hot-toast": "^2.4.1"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "PORT=$PORT HOST=0.0.0.0 react-scripts start",
     "build": "react-scripts build"
   },
   "browserslist": {
