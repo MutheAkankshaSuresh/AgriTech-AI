@@ -1254,6 +1254,10 @@ function formatReportValue(value) {
   return String(value);
 }
 
+function getRowId(row) {
+  return row?.id || row?._id || row?.log_id || null;
+}
+
 function getReportSummary(row) {
   const report = row?.report || row?.output?.report;
   if (hasMeaningfulText(report?.summary)) return report.summary;
@@ -2279,6 +2283,10 @@ function PredictPage({ addToast }) {
   };
 
   const deletePrediction = async (id) => {
+    if (!id) {
+      addToast('Record id missing for delete', 'error');
+      return;
+    }
     if (!window.confirm('Delete this prediction?')) return;
     try {
       await seedsAPI.deletePrediction(id);
@@ -2290,6 +2298,10 @@ function PredictPage({ addToast }) {
   };
 
   const deleteImageAnalysis = async (id) => {
+    if (!id) {
+      addToast('Record id missing for delete', 'error');
+      return;
+    }
     if (!window.confirm('Delete this image analysis?')) return;
     try {
       await seedsAPI.deleteImageAnalysis(id);
@@ -2314,7 +2326,7 @@ function PredictPage({ addToast }) {
         setHistoryReport(ctx);
         return;
       }
-      const { data } = await seedsAPI.getPredictionReport(row.id);
+      const { data } = await seedsAPI.getPredictionReport(getRowId(row));
       const ctx = {
         report: data?.report || null,
         moduleLabel: 'Seed Quality',
@@ -2350,7 +2362,7 @@ function PredictPage({ addToast }) {
         setHistoryReport(ctx);
         return;
       }
-      const { data } = await seedsAPI.getImageReport(row.id);
+      const { data } = await seedsAPI.getImageReport(getRowId(row));
       const ctx = {
         report: data?.report || null,
         moduleLabel: 'Seed Quality',
@@ -2493,7 +2505,7 @@ function PredictPage({ addToast }) {
               </thead>
               <tbody>
                 {predictionHistory.map((r) => (
-                  <tr key={r.id}>
+                  <tr key={getRowId(r) || r.created_at}>
                     <td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td>
                     <td><span className="mono">{r.batch_id || '-'}</span></td>
                     <td>{r?.input?.crop_type || '-'}</td>
@@ -2502,7 +2514,7 @@ function PredictPage({ addToast }) {
                     <td style={{ maxWidth: 360, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td>
                     <td style={{ display: 'flex', gap: 6, minWidth: 150 }}>
                       <button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openPredictionReport(r)}>👁</button>
-                      <button type="button" className="btn btn-danger btn-sm" title="Delete entry" onClick={() => deletePrediction(r.id)}>Delete</button>
+                      <button type="button" className="btn btn-danger btn-sm" title="Delete entry" onClick={() => deletePrediction(getRowId(r))}>Delete</button>
                     </td>
                   </tr>
                 ))}
@@ -2602,7 +2614,7 @@ function PredictPage({ addToast }) {
               </thead>
               <tbody>
                 {imageHistory.map((r) => (
-                  <tr key={r.id}>
+                  <tr key={getRowId(r) || r.created_at}>
                     <td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td>
                     <td><span className="mono">{r.batch_id || '-'}</span></td>
                     <td>{r.file_name || '-'}</td>
@@ -2612,7 +2624,7 @@ function PredictPage({ addToast }) {
                     <td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td>
                     <td style={{ display: 'flex', gap: 6 }}>
                       <button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openImageReport(r)}>👁</button>
-                      <button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deleteImageAnalysis(r.id)}>🗑️</button>
+                      <button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deleteImageAnalysis(getRowId(r))}>🗑️</button>
                     </td>
                   </tr>
                 ))}
@@ -2803,6 +2815,10 @@ function WaterIntelligencePage({ addToast, refreshKey, onDataChanged }) {
   };
 
   const deleteWaterEntry = async (id) => {
+    if (!id) {
+      addToast('Record id missing for delete', 'error');
+      return;
+    }
     if (!window.confirm('Delete this water assessment?')) return;
     try {
       await waterAPI.deleteEntry(id);
@@ -2828,7 +2844,7 @@ function WaterIntelligencePage({ addToast, refreshKey, onDataChanged }) {
         setEntryReport(ctx);
         return;
       }
-      const { data } = await waterAPI.getReport(row.id);
+      const { data } = await waterAPI.getReport(getRowId(row));
       const ctx = {
         report: data?.report || null,
         moduleLabel: 'Water Intelligence',
@@ -2886,7 +2902,7 @@ function WaterIntelligencePage({ addToast, refreshKey, onDataChanged }) {
       <div className="table-card" style={{ marginTop: 20 }}>
         <div className="table-header"><div className="chart-title">Recent Water Assessments</div></div>
         <table><thead><tr><th>Time</th><th>Plot</th><th>Crop</th><th>Need (mm)</th><th>Priority</th><th>Verdict</th><th>Report</th><th>Actions</th></tr></thead><tbody>
-          {rows.map(r => <tr key={r.id}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.plot_id || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.irrigation_need_mm ?? '-'}</td><td>{r?.output?.priority || '-'}</td><td><span className={`badge ${deriveVerdict('Water Intelligence', r?.output).className}`}>{deriveVerdict('Water Intelligence', r?.output).label}</span></td><td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td><td style={{ display: 'flex', gap: 6 }}><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>👁</button><button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deleteWaterEntry(r.id)}>🗑️</button></td></tr>)}
+          {rows.map(r => <tr key={getRowId(r) || r.created_at}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.plot_id || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.irrigation_need_mm ?? '-'}</td><td>{r?.output?.priority || '-'}</td><td><span className={`badge ${deriveVerdict('Water Intelligence', r?.output).className}`}>{deriveVerdict('Water Intelligence', r?.output).label}</span></td><td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td><td style={{ display: 'flex', gap: 6 }}><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>👁</button><button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deleteWaterEntry(getRowId(r))}>🗑️</button></td></tr>)}
           {!rows.length && <tr><td colSpan={8} style={{ textAlign: 'center', color: '#5a785a' }}>No records yet</td></tr>}
         </tbody></table>
       </div>
@@ -2944,6 +2960,10 @@ function PrecisionFarmingPage({ addToast, refreshKey, onDataChanged }) {
   };
 
   const deletePrecisionEntry = async (id) => {
+    if (!id) {
+      addToast('Record id missing for delete', 'error');
+      return;
+    }
     if (!window.confirm('Delete this precision analysis?')) return;
     try {
       await precisionAPI.deleteEntry(id);
@@ -2969,7 +2989,7 @@ function PrecisionFarmingPage({ addToast, refreshKey, onDataChanged }) {
         setEntryReport(ctx);
         return;
       }
-      const { data } = await precisionAPI.getReport(row.id);
+      const { data } = await precisionAPI.getReport(getRowId(row));
       const ctx = {
         report: data?.report || buildFallbackReport('Precision Farming', row?.output?.field_id || row?.input?.field_id || 'Precision Run', row?.output, row?.created_at),
         moduleLabel: 'Precision Farming',
@@ -3014,7 +3034,7 @@ function PrecisionFarmingPage({ addToast, refreshKey, onDataChanged }) {
       <div className="table-card" style={{ marginTop: 20 }}>
         <div className="table-header"><div className="chart-title">Recent Precision Runs</div></div>
         <table><thead><tr><th>Time</th><th>Field</th><th>Crop</th><th>Pred Yield</th><th>Risk</th><th>Verdict</th><th>Report</th><th>Actions</th></tr></thead><tbody>
-          {rows.map(r => <tr key={r.id}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.field_id || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.predicted_seed_output_t_ha ?? '-'}</td><td>{r?.output?.risk_band || '-'}</td><td><span className={`badge ${deriveVerdict('Precision Farming', r?.output).className}`}>{deriveVerdict('Precision Farming', r?.output).label}</span></td><td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td><td style={{ display: 'flex', gap: 6 }}><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>👁</button><button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deletePrecisionEntry(r.id)}>🗑️</button></td></tr>)}
+          {rows.map(r => <tr key={getRowId(r) || r.created_at}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.field_id || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.predicted_seed_output_t_ha ?? '-'}</td><td>{r?.output?.risk_band || '-'}</td><td><span className={`badge ${deriveVerdict('Precision Farming', r?.output).className}`}>{deriveVerdict('Precision Farming', r?.output).label}</span></td><td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td><td style={{ display: 'flex', gap: 6 }}><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>👁</button><button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deletePrecisionEntry(getRowId(r))}>🗑️</button></td></tr>)}
           {!rows.length && <tr><td colSpan={8} style={{ textAlign: 'center', color: '#5a785a' }}>No records yet</td></tr>}
         </tbody></table>
       </div>
@@ -3072,6 +3092,10 @@ function ClimateResiliencePage({ addToast, refreshKey, onDataChanged }) {
   };
 
   const deleteClimateEntry = async (id) => {
+    if (!id) {
+      addToast('Record id missing for delete', 'error');
+      return;
+    }
     if (!window.confirm('Delete this climate assessment?')) return;
     try {
       await climateAPI.deleteEntry(id);
@@ -3097,7 +3121,7 @@ function ClimateResiliencePage({ addToast, refreshKey, onDataChanged }) {
         setEntryReport(ctx);
         return;
       }
-      const { data } = await climateAPI.getReport(row.id);
+      const { data } = await climateAPI.getReport(getRowId(row));
       const ctx = {
         report: data?.report || null,
         moduleLabel: 'Climate Resilience',
@@ -3142,7 +3166,7 @@ function ClimateResiliencePage({ addToast, refreshKey, onDataChanged }) {
       <div className="table-card" style={{ marginTop: 20 }}>
         <div className="table-header"><div className="chart-title">Recent Climate Assessments</div></div>
         <table><thead><tr><th>Time</th><th>Region</th><th>Crop</th><th>Risk</th><th>Sustainability</th><th>Verdict</th><th>Report</th><th>Actions</th></tr></thead><tbody>
-          {rows.map(r => <tr key={r.id}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.region || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.climate_risk_score ?? '-'}</td><td>{r?.output?.sustainability_score ?? '-'}</td><td><span className={`badge ${deriveVerdict('Climate Resilience', r?.output).className}`}>{deriveVerdict('Climate Resilience', r?.output).label}</span></td><td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td><td style={{ display: 'flex', gap: 6 }}><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>👁</button><button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deleteClimateEntry(r.id)}>🗑️</button></td></tr>)}
+          {rows.map(r => <tr key={getRowId(r) || r.created_at}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.region || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.climate_risk_score ?? '-'}</td><td>{r?.output?.sustainability_score ?? '-'}</td><td><span className={`badge ${deriveVerdict('Climate Resilience', r?.output).className}`}>{deriveVerdict('Climate Resilience', r?.output).label}</span></td><td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td><td style={{ display: 'flex', gap: 6 }}><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>👁</button><button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deleteClimateEntry(getRowId(r))}>🗑️</button></td></tr>)}
           {!rows.length && <tr><td colSpan={8} style={{ textAlign: 'center', color: '#5a785a' }}>No records yet</td></tr>}
         </tbody></table>
       </div>
@@ -3290,4 +3314,5 @@ export default function App() {
     </>
   );
 }
+
 
