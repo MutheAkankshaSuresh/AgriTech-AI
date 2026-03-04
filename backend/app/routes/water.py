@@ -153,6 +153,18 @@ async def water_report(log_id: str):
         raise HTTPException(status_code=404, detail="Report not found")
     return {"log_id": log_id, "report": doc.get("report") or doc.get("output", {}).get("report")}
 
+@router.delete("/history/{log_id}")
+async def delete_water_history(log_id: str):
+    db = get_db()
+    try:
+        oid = ObjectId(log_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid log id")
+    result = await db.water_intelligence_logs.delete_one({"_id": oid})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Record not found")
+    return {"message": "Water assessment deleted", "log_id": log_id}
+
 
 @router.get("/stats")
 async def water_stats():

@@ -144,6 +144,18 @@ async def precision_report(log_id: str):
         raise HTTPException(status_code=404, detail="Report not found")
     return {"log_id": log_id, "report": doc.get("report") or doc.get("output", {}).get("report")}
 
+@router.delete("/history/{log_id}")
+async def delete_precision_history(log_id: str):
+    db = get_db()
+    try:
+        oid = ObjectId(log_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid log id")
+    result = await db.precision_farming_logs.delete_one({"_id": oid})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Record not found")
+    return {"message": "Precision analysis deleted", "log_id": log_id}
+
 
 @router.get("/stats")
 async def precision_stats():

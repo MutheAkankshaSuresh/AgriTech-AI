@@ -445,6 +445,38 @@ async def get_image_history(batch_id: str = None, defect_class: str = None, page
     total = await db.ai_prediction_logs.count_documents(query)
     return {"records": rows, "total": total, "page": page, "pages": (total + limit - 1) // limit}
 
+@router.delete("/batches/{batch_id}")
+async def delete_batch(batch_id: str):
+    db = get_db()
+    result = await db.seed_batches.delete_one({"batch_id": batch_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Batch not found")
+    return {"message": f"Batch {batch_id} deleted", "batch_id": batch_id}
+
+@router.delete("/prediction-history/{log_id}")
+async def delete_prediction_history(log_id: str):
+    db = get_db()
+    try:
+        oid = ObjectId(log_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid log id")
+    result = await db.ai_prediction_logs.delete_one({"_id": oid, "analysis_type": "tabular"})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Prediction record not found")
+    return {"message": "Prediction deleted", "log_id": log_id}
+
+@router.delete("/image-history/{log_id}")
+async def delete_image_history(log_id: str):
+    db = get_db()
+    try:
+        oid = ObjectId(log_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid log id")
+    result = await db.ai_prediction_logs.delete_one({"_id": oid, "analysis_type": "image"})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Image analysis record not found")
+    return {"message": "Image analysis deleted", "log_id": log_id}
+
 
 @router.get("/batches/{batch_id}/report")
 async def get_batch_report(batch_id: str):

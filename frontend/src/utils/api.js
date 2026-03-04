@@ -20,6 +20,7 @@ export const seedsAPI = {
   getBatches: (params) => api.get('/api/seeds/batches', { params }),
   getBatch: (id) => api.get(`/api/seeds/batches/${id}`),
   createBatch: (data) => api.post('/api/seeds/batches', data),
+  deleteBatch: (batchId) => api.delete(`/api/seeds/batches/${batchId}`),
   predict: (data) => api.post('/api/seeds/predict', data),
   analyzeImage: (file, batchId) => {
     const form = new FormData();
@@ -34,6 +35,8 @@ export const seedsAPI = {
   },
   getPredictionHistory: (params) => api.get('/api/seeds/prediction-history', { params }),
   getImageHistory: (params) => api.get('/api/seeds/image-history', { params }),
+  deletePrediction: (id) => api.delete(`/api/seeds/prediction-history/${id}`),
+  deleteImageAnalysis: (id) => api.delete(`/api/seeds/image-history/${id}`),
   getBatchReport: (batchId) => api.get(`/api/seeds/batches/${batchId}/report`),
   getPredictionReport: (logId) => api.get(`/api/seeds/prediction-history/${logId}/report`),
   getImageReport: (logId) => api.get(`/api/seeds/image-history/${logId}/report`),
@@ -55,6 +58,7 @@ export const waterAPI = {
   getHistory: (params) => api.get('/api/water/history', { params }),
   getAdvice: (data) => api.post('/api/water/irrigation-advice', data),
   getReport: (id) => api.get(`/api/water/history/${id}/report`),
+  deleteEntry: (id) => api.delete(`/api/water/history/${id}`),
 };
 
 export const precisionAPI = {
@@ -62,6 +66,7 @@ export const precisionAPI = {
   getHistory: (params) => api.get('/api/precision/history', { params }),
   analyzeField: (data) => api.post('/api/precision/field-analysis', data),
   getReport: (id) => api.get(`/api/precision/history/${id}/report`),
+  deleteEntry: (id) => api.delete(`/api/precision/history/${id}`),
 };
 
 export const climateAPI = {
@@ -69,6 +74,7 @@ export const climateAPI = {
   getHistory: (params) => api.get('/api/climate/history', { params }),
   getPlan: (data) => api.post('/api/climate/resilience-plan', data),
   getReport: (id) => api.get(`/api/climate/history/${id}/report`),
+  deleteEntry: (id) => api.delete(`/api/climate/history/${id}`),
 };
 
 export default api;

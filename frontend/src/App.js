@@ -1254,6 +1254,55 @@ function formatReportValue(value) {
   return String(value);
 }
 
+function getReportSummary(row) {
+  const report = row?.report || row?.output?.report;
+  if (hasMeaningfulText(report?.summary)) return report.summary;
+  return 'Report available';
+}
+
+function deriveVerdict(moduleLabel, output = {}) {
+  const moduleName = (moduleLabel || '').toLowerCase();
+
+  if (moduleName.includes('seed')) {
+    const direct = output?.pass_fail;
+    if (direct === 'PASS') return { label: 'PASS', className: 'pass' };
+    if (direct === 'FAIL') return { label: 'FAIL', className: 'fail' };
+    const defect = output?.defect_class || output?.cnn_defect?.defect_class;
+    if (defect === 'Healthy') return { label: 'PASS', className: 'pass' };
+    if (defect === 'Pending Image Analysis') return { label: 'PENDING', className: 'pending' };
+    if (defect) return { label: 'FAIL', className: 'fail' };
+    return { label: 'NA', className: 'info' };
+  }
+
+  if (moduleName.includes('water')) {
+    const priority = String(output?.priority || '').toLowerCase();
+    const leakRisk = String(output?.leak_risk || '').toLowerCase();
+    if (priority === 'critical' || priority === 'high' || leakRisk === 'high') return { label: 'FAIL', className: 'fail' };
+    if (priority === 'normal' && leakRisk === 'low') return { label: 'PASS', className: 'pass' };
+    return { label: 'WARNING', className: 'warning' };
+  }
+
+  if (moduleName.includes('precision')) {
+    const risk = String(output?.risk_band || '').toLowerCase();
+    if (risk === 'high') return { label: 'FAIL', className: 'fail' };
+    if (risk === 'medium') return { label: 'WARNING', className: 'warning' };
+    if (risk === 'low') return { label: 'PASS', className: 'pass' };
+    return { label: 'NA', className: 'info' };
+  }
+
+  if (moduleName.includes('climate')) {
+    const score = Number(output?.climate_risk_score ?? NaN);
+    if (!Number.isNaN(score)) {
+      if (score >= 75) return { label: 'FAIL', className: 'fail' };
+      if (score >= 45) return { label: 'WARNING', className: 'warning' };
+      return { label: 'PASS', className: 'pass' };
+    }
+    return { label: 'NA', className: 'info' };
+  }
+
+  return { label: 'NA', className: 'info' };
+}
+
 function scalarEntries(obj) {
   return Object.entries(obj || {})
     .filter(([k, v]) => !REPORT_OUTPUT_EXCLUDE.has(k) && !Array.isArray(v) && typeof v !== 'object')
@@ -1904,6 +1953,18 @@ function BatchesPage({ addToast, onBatchCreated }) {
     }
   };
 
+  const deleteBatch = async (batchId) => {
+    if (!window.confirm(`Delete batch ${batchId}?`)) return;
+    try {
+      await seedsAPI.deleteBatch(batchId);
+      addToast(`Batch ${batchId} deleted`, 'success');
+      await loadBatches();
+      if (onBatchCreated) onBatchCreated();
+    } catch (error) {
+      addToast(error?.response?.data?.detail || 'Failed to delete batch', 'error');
+    }
+  };
+
   const openBatchReport = async (batch) => {
     try {
       if (batch?.quality_report) {
@@ -2110,6 +2171,9 @@ function BatchesPage({ addToast, onBatchCreated }) {
                   <button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={(e) => { e.preventDefault(); e.stopPropagation(); openBatchReport(b); }}>
                     👁
                   </button>
+                  <button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete batch" onClick={(e) => { e.preventDefault(); e.stopPropagation(); deleteBatch(b.batch_id); }}>
+                    🗑️
+                  </button>
                 </td>
               </tr>
             ))}
@@ -2211,6 +2275,28 @@ function PredictPage({ addToast }) {
       addToast(error?.response?.data?.detail || 'Image analysis failed', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deletePrediction = async (id) => {
+    if (!window.confirm('Delete this prediction?')) return;
+    try {
+      await seedsAPI.deletePrediction(id);
+      addToast('Prediction deleted', 'success');
+      await loadHistory();
+    } catch (error) {
+      addToast(error?.response?.data?.detail || 'Failed to delete', 'error');
+    }
+  };
+
+  const deleteImageAnalysis = async (id) => {
+    if (!window.confirm('Delete this image analysis?')) return;
+    try {
+      await seedsAPI.deleteImageAnalysis(id);
+      addToast('Image analysis deleted', 'success');
+      await loadHistory();
+    } catch (error) {
+      addToast(error?.response?.data?.detail || 'Failed to delete', 'error');
     }
   };
 
@@ -2402,6 +2488,7 @@ function PredictPage({ addToast }) {
                   <th>Predicted GP</th>
                   <th>Verdict</th>
                   <th>Report</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -2412,11 +2499,15 @@ function PredictPage({ addToast }) {
                     <td>{r?.input?.crop_type || '-'}</td>
                     <td>{r?.output?.predicted_gp_percent ?? '-'}</td>
                     <td><span className={`badge ${(r?.output?.pass_fail || '').toLowerCase()}`}>{r?.output?.pass_fail || '-'}</span></td>
-                    <td><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openPredictionReport(r)}>👁</button></td>
+                    <td style={{ maxWidth: 360, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td>
+                    <td style={{ display: 'flex', gap: 6, minWidth: 150 }}>
+                      <button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openPredictionReport(r)}>👁</button>
+                      <button type="button" className="btn btn-danger btn-sm" title="Delete entry" onClick={() => deletePrediction(r.id)}>Delete</button>
+                    </td>
                   </tr>
                 ))}
                 {!predictionHistory.length && (
-                  <tr><td colSpan={6} style={{ textAlign: 'center', color: '#5a785a' }}>No saved predictions yet</td></tr>
+                  <tr><td colSpan={7} style={{ textAlign: 'center', color: '#5a785a' }}>No saved predictions yet</td></tr>
                 )}
               </tbody>
             </table>
@@ -2504,7 +2595,9 @@ function PredictPage({ addToast }) {
                   <th>File</th>
                   <th>Defect</th>
                   <th>Confidence</th>
+                  <th>Verdict</th>
                   <th>Report</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -2515,11 +2608,16 @@ function PredictPage({ addToast }) {
                     <td>{r.file_name || '-'}</td>
                     <td>{r?.output?.cnn_defect?.defect_class || '-'}</td>
                     <td>{r?.output?.cnn_defect?.confidence ? `${(r.output.cnn_defect.confidence * 100).toFixed(1)}%` : '-'}</td>
-                    <td><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openImageReport(r)}>👁</button></td>
+                    <td><span className={`badge ${deriveVerdict('Seed Quality', r?.output).className}`}>{deriveVerdict('Seed Quality', r?.output).label}</span></td>
+                    <td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td>
+                    <td style={{ display: 'flex', gap: 6 }}>
+                      <button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openImageReport(r)}>👁</button>
+                      <button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deleteImageAnalysis(r.id)}>🗑️</button>
+                    </td>
                   </tr>
                 ))}
                 {!imageHistory.length && (
-                  <tr><td colSpan={6} style={{ textAlign: 'center', color: '#5a785a' }}>No saved image analyses yet</td></tr>
+                  <tr><td colSpan={8} style={{ textAlign: 'center', color: '#5a785a' }}>No saved image analyses yet</td></tr>
                 )}
               </tbody>
             </table>
@@ -2704,6 +2802,18 @@ function WaterIntelligencePage({ addToast, refreshKey, onDataChanged }) {
     }
   };
 
+  const deleteWaterEntry = async (id) => {
+    if (!window.confirm('Delete this water assessment?')) return;
+    try {
+      await waterAPI.deleteEntry(id);
+      addToast('Water assessment deleted', 'success');
+      await loadAll();
+      if (onDataChanged) onDataChanged();
+    } catch (error) {
+      addToast(error?.response?.data?.detail || 'Failed to delete', 'error');
+    }
+  };
+
   const openEntryReport = async (row) => {
     try {
       if (row?.report || row?.output?.report) {
@@ -2775,9 +2885,9 @@ function WaterIntelligencePage({ addToast, refreshKey, onDataChanged }) {
       </div>
       <div className="table-card" style={{ marginTop: 20 }}>
         <div className="table-header"><div className="chart-title">Recent Water Assessments</div></div>
-        <table><thead><tr><th>Time</th><th>Plot</th><th>Crop</th><th>Need (mm)</th><th>Priority</th><th>Report</th></tr></thead><tbody>
-          {rows.map(r => <tr key={r.id}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.plot_id || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.irrigation_need_mm ?? '-'}</td><td>{r?.output?.priority || '-'}</td><td><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>👁</button></td></tr>)}
-          {!rows.length && <tr><td colSpan={6} style={{ textAlign: 'center', color: '#5a785a' }}>No records yet</td></tr>}
+        <table><thead><tr><th>Time</th><th>Plot</th><th>Crop</th><th>Need (mm)</th><th>Priority</th><th>Verdict</th><th>Report</th><th>Actions</th></tr></thead><tbody>
+          {rows.map(r => <tr key={r.id}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.plot_id || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.irrigation_need_mm ?? '-'}</td><td>{r?.output?.priority || '-'}</td><td><span className={`badge ${deriveVerdict('Water Intelligence', r?.output).className}`}>{deriveVerdict('Water Intelligence', r?.output).label}</span></td><td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td><td style={{ display: 'flex', gap: 6 }}><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>👁</button><button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deleteWaterEntry(r.id)}>🗑️</button></td></tr>)}
+          {!rows.length && <tr><td colSpan={8} style={{ textAlign: 'center', color: '#5a785a' }}>No records yet</td></tr>}
         </tbody></table>
       </div>
     </>
@@ -2830,6 +2940,18 @@ function PrecisionFarmingPage({ addToast, refreshKey, onDataChanged }) {
       addToast(error?.response?.data?.detail || 'Failed to run precision analysis', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deletePrecisionEntry = async (id) => {
+    if (!window.confirm('Delete this precision analysis?')) return;
+    try {
+      await precisionAPI.deleteEntry(id);
+      addToast('Precision analysis deleted', 'success');
+      await loadAll();
+      if (onDataChanged) onDataChanged();
+    } catch (error) {
+      addToast(error?.response?.data?.detail || 'Failed to delete', 'error');
     }
   };
 
@@ -2891,9 +3013,9 @@ function PrecisionFarmingPage({ addToast, refreshKey, onDataChanged }) {
       </div>
       <div className="table-card" style={{ marginTop: 20 }}>
         <div className="table-header"><div className="chart-title">Recent Precision Runs</div></div>
-        <table><thead><tr><th>Time</th><th>Field</th><th>Crop</th><th>Pred Yield</th><th>Risk</th><th>Report</th></tr></thead><tbody>
-          {rows.map(r => <tr key={r.id}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.field_id || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.predicted_seed_output_t_ha ?? '-'}</td><td>{r?.output?.risk_band || '-'}</td><td><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>👁</button></td></tr>)}
-          {!rows.length && <tr><td colSpan={6} style={{ textAlign: 'center', color: '#5a785a' }}>No records yet</td></tr>}
+        <table><thead><tr><th>Time</th><th>Field</th><th>Crop</th><th>Pred Yield</th><th>Risk</th><th>Verdict</th><th>Report</th><th>Actions</th></tr></thead><tbody>
+          {rows.map(r => <tr key={r.id}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.field_id || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.predicted_seed_output_t_ha ?? '-'}</td><td>{r?.output?.risk_band || '-'}</td><td><span className={`badge ${deriveVerdict('Precision Farming', r?.output).className}`}>{deriveVerdict('Precision Farming', r?.output).label}</span></td><td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td><td style={{ display: 'flex', gap: 6 }}><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>👁</button><button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deletePrecisionEntry(r.id)}>🗑️</button></td></tr>)}
+          {!rows.length && <tr><td colSpan={8} style={{ textAlign: 'center', color: '#5a785a' }}>No records yet</td></tr>}
         </tbody></table>
       </div>
     </>
@@ -2946,6 +3068,18 @@ function ClimateResiliencePage({ addToast, refreshKey, onDataChanged }) {
       addToast(error?.response?.data?.detail || 'Failed to generate plan', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteClimateEntry = async (id) => {
+    if (!window.confirm('Delete this climate assessment?')) return;
+    try {
+      await climateAPI.deleteEntry(id);
+      addToast('Climate assessment deleted', 'success');
+      await loadAll();
+      if (onDataChanged) onDataChanged();
+    } catch (error) {
+      addToast(error?.response?.data?.detail || 'Failed to delete', 'error');
     }
   };
 
@@ -3007,9 +3141,9 @@ function ClimateResiliencePage({ addToast, refreshKey, onDataChanged }) {
       </div>
       <div className="table-card" style={{ marginTop: 20 }}>
         <div className="table-header"><div className="chart-title">Recent Climate Assessments</div></div>
-        <table><thead><tr><th>Time</th><th>Region</th><th>Crop</th><th>Risk</th><th>Sustainability</th><th>Report</th></tr></thead><tbody>
-          {rows.map(r => <tr key={r.id}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.region || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.climate_risk_score ?? '-'}</td><td>{r?.output?.sustainability_score ?? '-'}</td><td><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>👁</button></td></tr>)}
-          {!rows.length && <tr><td colSpan={6} style={{ textAlign: 'center', color: '#5a785a' }}>No records yet</td></tr>}
+        <table><thead><tr><th>Time</th><th>Region</th><th>Crop</th><th>Risk</th><th>Sustainability</th><th>Verdict</th><th>Report</th><th>Actions</th></tr></thead><tbody>
+          {rows.map(r => <tr key={r.id}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.region || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.climate_risk_score ?? '-'}</td><td>{r?.output?.sustainability_score ?? '-'}</td><td><span className={`badge ${deriveVerdict('Climate Resilience', r?.output).className}`}>{deriveVerdict('Climate Resilience', r?.output).label}</span></td><td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td><td style={{ display: 'flex', gap: 6 }}><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>👁</button><button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deleteClimateEntry(r.id)}>🗑️</button></td></tr>)}
+          {!rows.length && <tr><td colSpan={8} style={{ textAlign: 'center', color: '#5a785a' }}>No records yet</td></tr>}
         </tbody></table>
       </div>
     </>
