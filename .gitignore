@@ -43,3 +43,7 @@ Thumbs.db
 
 # Temp
 backend/temp_seed.jpg
+
+# Local secrets
+.env
+backend/.env
