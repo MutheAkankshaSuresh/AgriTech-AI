@@ -2,11 +2,11 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic_settings import BaseSettings
 from typing import Optional
 import os
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlparse
 
 class Settings(BaseSettings):
-    MONGODB_URL: str = "mongodb://agritech_admin:AgriTech@2024@localhost:27017/agritech_db?authSource=admin"
-    DATABASE_NAME: str = "agritech_db"
+    MONGODB_URL: Optional[str] = None
+    DATABASE_NAME: Optional[str] = None
     SECRET_KEY: str = "agritech-super-secret-jwt-key-2024"
     ML_MODELS_PATH: str = "./ml_models"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
@@ -15,6 +15,12 @@ class Settings(BaseSettings):
         env_file = ".env"
 
 settings = Settings()
+settings.MONGODB_URL = (
+    settings.MONGODB_URL
+    or os.getenv("MONGODB_URI")
+    or os.getenv("MONGO_URL")
+    or "mongodb://localhost:27017/agritech_db"
+)
 
 class Database:
     client: Optional[AsyncIOMotorClient] = None
@@ -35,10 +41,19 @@ def _normalize_mongodb_url(url: str) -> str:
     username, password = creds.split(":", 1)
     return f"{scheme}://{quote_plus(username)}:{quote_plus(password)}@{host_and_query}"
 
+def _database_name_from_url(url: str) -> Optional[str]:
+    parsed = urlparse(url)
+    path = (parsed.path or "").strip("/")
+    if path:
+        return path
+    return None
+
 async def connect_db():
-    db_instance.client = AsyncIOMotorClient(_normalize_mongodb_url(settings.MONGODB_URL))
-    db_instance.db = db_instance.client[settings.DATABASE_NAME]
-    print(f"✅ Connected to MongoDB: {settings.DATABASE_NAME}")
+    mongodb_url = _normalize_mongodb_url(settings.MONGODB_URL)
+    db_name = settings.DATABASE_NAME or _database_name_from_url(mongodb_url) or "agritech_db"
+    db_instance.client = AsyncIOMotorClient(mongodb_url)
+    db_instance.db = db_instance.client[db_name]
+    print(f"Connected to MongoDB: {db_name}")
     await seed_initial_data()
 
 async def close_db():
