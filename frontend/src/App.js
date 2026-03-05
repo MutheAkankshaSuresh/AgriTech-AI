@@ -1255,7 +1255,22 @@ function formatReportValue(value) {
 }
 
 function getRowId(row) {
-  return row?.id || row?._id || row?.log_id || null;
+  const raw = row?.id ?? row?._id ?? row?.log_id ?? null;
+  if (!raw) return null;
+
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim();
+    const objectIdMatch = trimmed.match(/^ObjectId\(["']?([a-fA-F0-9]{24})["']?\)$/);
+    return objectIdMatch ? objectIdMatch[1] : trimmed;
+  }
+
+  if (typeof raw === 'object') {
+    if (typeof raw.$oid === 'string') return raw.$oid;
+    if (typeof raw.oid === 'string') return raw.oid;
+    if (typeof raw.id === 'string') return raw.id;
+  }
+
+  return String(raw);
 }
 
 function getReportSummary(row) {

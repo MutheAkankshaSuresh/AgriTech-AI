@@ -35,11 +35,11 @@ export const seedsAPI = {
   },
   getPredictionHistory: (params) => api.get('/api/seeds/prediction-history', { params }),
   getImageHistory: (params) => api.get('/api/seeds/image-history', { params }),
-  deletePrediction: (id) => api.delete(`/api/seeds/prediction-history/${id}`),
-  deleteImageAnalysis: (id) => api.delete(`/api/seeds/image-history/${id}`),
+  deletePrediction: (id) => api.delete(`/api/seeds/prediction-history/${encodeURIComponent(id)}`),
+  deleteImageAnalysis: (id) => api.delete(`/api/seeds/image-history/${encodeURIComponent(id)}`),
   getBatchReport: (batchId) => api.get(`/api/seeds/batches/${batchId}/report`),
-  getPredictionReport: (logId) => api.get(`/api/seeds/prediction-history/${logId}/report`),
-  getImageReport: (logId) => api.get(`/api/seeds/image-history/${logId}/report`),
+  getPredictionReport: (logId) => api.get(`/api/seeds/prediction-history/${encodeURIComponent(logId)}/report`),
+  getImageReport: (logId) => api.get(`/api/seeds/image-history/${encodeURIComponent(logId)}/report`),
   getStats: () => api.get('/api/seeds/stats'),
   getGPTrend: () => api.get('/api/seeds/gp-trend'),
 };
@@ -57,24 +57,24 @@ export const waterAPI = {
   getStats: () => api.get('/api/water/stats'),
   getHistory: (params) => api.get('/api/water/history', { params }),
   getAdvice: (data) => api.post('/api/water/irrigation-advice', data),
-  getReport: (id) => api.get(`/api/water/history/${id}/report`),
-  deleteEntry: (id) => api.delete(`/api/water/history/${id}`),
+  getReport: (id) => api.get(`/api/water/history/${encodeURIComponent(id)}/report`),
+  deleteEntry: (id) => api.delete(`/api/water/history/${encodeURIComponent(id)}`),
 };
 
 export const precisionAPI = {
   getStats: () => api.get('/api/precision/stats'),
   getHistory: (params) => api.get('/api/precision/history', { params }),
   analyzeField: (data) => api.post('/api/precision/field-analysis', data),
-  getReport: (id) => api.get(`/api/precision/history/${id}/report`),
-  deleteEntry: (id) => api.delete(`/api/precision/history/${id}`),
+  getReport: (id) => api.get(`/api/precision/history/${encodeURIComponent(id)}/report`),
+  deleteEntry: (id) => api.delete(`/api/precision/history/${encodeURIComponent(id)}`),
 };
 
 export const climateAPI = {
   getStats: () => api.get('/api/climate/stats'),
   getHistory: (params) => api.get('/api/climate/history', { params }),
   getPlan: (data) => api.post('/api/climate/resilience-plan', data),
-  getReport: (id) => api.get(`/api/climate/history/${id}/report`),
-  deleteEntry: (id) => api.delete(`/api/climate/history/${id}`),
+  getReport: (id) => api.get(`/api/climate/history/${encodeURIComponent(id)}/report`),
+  deleteEntry: (id) => api.delete(`/api/climate/history/${encodeURIComponent(id)}`),
 };
 
 export default api;
