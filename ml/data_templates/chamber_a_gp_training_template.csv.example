@@ -1,0 +1,6 @@
+temperature_c,humidity_percent,seed_moisture_percent,storage_days,damaged_seeds,color_uniformity,crop_type,actual_gp_percent
+25.2,58.0,9.5,0,1,92.0,Cotton,91.5
+26.4,61.3,10.1,30,2,89.0,Cotton,87.3
+27.8,68.2,11.3,60,3,84.0,Bajra,80.4
+29.1,72.5,12.0,90,4,79.5,Tomato,73.1
+30.3,75.0,12.8,120,5,75.0,Chilli,66.9

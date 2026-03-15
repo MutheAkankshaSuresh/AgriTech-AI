@@ -1,0 +1,5 @@
+image_name,batch_id,captured_at,total_seeds,germinated_seeds,damaged_seeds,mold_presence,quality_label
+batch_a1_t0.jpg,BATCH-A1,2026-03-01T06:00:00,20,2,1,false,early
+batch_a1_t1.jpg,BATCH-A1,2026-03-01T12:00:00,20,6,1,false,mid
+batch_a1_t2.jpg,BATCH-A1,2026-03-01T18:00:00,20,12,2,false,mid
+batch_a1_t3.jpg,BATCH-A1,2026-03-02T00:00:00,20,16,3,true,late

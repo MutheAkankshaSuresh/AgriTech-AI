@@ -2,6 +2,7 @@ import numpy as np
 import joblib
 import os
 from pathlib import Path
+from typing import List
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
@@ -79,7 +80,12 @@ class SeedDefectCNN(nn.Module):
 
 class MLService:
     def __init__(self):
-        self.models_path = Path(os.getenv("ML_MODELS_PATH", "./ml_models"))
+        env_path = os.getenv("ML_MODELS_PATH")
+        if env_path:
+            self.models_path = Path(env_path)
+        else:
+            preferred = Path("backend/ml_models")
+            self.models_path = preferred if preferred.exists() else Path("./ml_models")
         self.gp_model = None
         self.defect_model = None
         self.seed_model_yolo = None
@@ -88,17 +94,46 @@ class MLService:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.crop_encoding = {"Cotton": 0, "Bajra": 1, "Tomato": 2, "Brinjal": 3, "Chilli": 4}
 
+        self.image_size = 224
+        self.image_mean = [0.485, 0.456, 0.406]
+        self.image_std = [0.229, 0.224, 0.225]
         self.transform = transforms.Compose(
             [
-                transforms.Resize((224, 224)),
+                transforms.Resize((self.image_size, self.image_size)),
                 transforms.ToTensor(),
-                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                transforms.Normalize(mean=self.image_mean, std=self.image_std),
             ]
         )
 
+    def _build_feature_vector(self, features: dict) -> np.ndarray:
+        crop_enc = self.crop_encoding.get(features.get("crop_type", "Cotton"), 0)
+        raw = np.array(
+            [
+                [
+                    features.get("moisture_percent", 8.0),
+                    features.get("thousand_seed_weight_g", 100.0),
+                    features.get("physical_purity_percent", 98.0),
+                    features.get("storage_temperature_c", 20.0),
+                    features.get("storage_humidity_percent", 50.0),
+                    features.get("days_since_harvest", 30),
+                    crop_enc,
+                    features.get("moisture_percent", 8.0)
+                    * features.get("storage_humidity_percent", 50.0)
+                    / 100,
+                ]
+            ],
+            dtype=np.float32,
+        )
+        if self.scaler is not None and hasattr(self.scaler, "mean_"):
+            try:
+                return self.scaler.transform(raw).astype(np.float32)
+            except Exception:
+                return raw
+        return raw
+
     async def load_models(self):
         """Load GP, CNN, YOLO models independently so one failure does not break others."""
-        gp_path = self.models_path / "gp_predictor.pth"
+        gp_path = self.models_path / "gp_model.pth"
         self.gp_model = SeedGPPredictor(input_dim=8)
         try:
             if gp_path.exists():
@@ -110,7 +145,7 @@ class MLService:
             print(f"GP model load failed, using untrained model: {e}")
         self.gp_model.to(self.device).eval()
 
-        defect_path = self.models_path / "defect_classifier.pth"
+        defect_path = self.models_path / "cnn_model.pth"
         self.defect_model = SeedDefectCNN(num_classes=4)
         try:
             if defect_path.exists():
@@ -122,7 +157,7 @@ class MLService:
             print(f"CNN model load failed, using untrained model: {e}")
         self.defect_model.to(self.device).eval()
 
-        scaler_path = self.models_path / "feature_scaler.pkl"
+        scaler_path = self.models_path / "scaler.pkl"
         try:
             if scaler_path.exists():
                 self.scaler = joblib.load(scaler_path)
@@ -150,24 +185,7 @@ class MLService:
 
     def predict_gp(self, features: dict) -> dict:
         try:
-            crop_enc = self.crop_encoding.get(features.get("crop_type", "Cotton"), 0)
-            feature_vector = np.array(
-                [
-                    [
-                        features.get("moisture_percent", 8.0),
-                        features.get("thousand_seed_weight_g", 100.0),
-                        features.get("physical_purity_percent", 98.0),
-                        features.get("storage_temperature_c", 20.0),
-                        features.get("storage_humidity_percent", 50.0),
-                        features.get("days_since_harvest", 30),
-                        crop_enc,
-                        features.get("moisture_percent", 8.0)
-                        * features.get("storage_humidity_percent", 50.0)
-                        / 100,
-                    ]
-                ],
-                dtype=np.float32,
-            )
+            feature_vector = self._build_feature_vector(features)
 
             with torch.no_grad():
                 tensor = torch.FloatTensor(feature_vector).to(self.device)
@@ -202,6 +220,45 @@ class MLService:
                 "defect_risk": "Medium",
                 "recommendations": ["Run full lab test for accurate results"],
             }
+
+    def predict_gp_timeline(self, base_features: dict, forecast_days: List[int]) -> dict:
+        points = sorted(set([int(x) for x in forecast_days if int(x) >= 0]))
+        if 0 not in points:
+            points = [0] + points
+
+        timeline = []
+        for extra_days in points:
+            features = {**base_features, "days_since_harvest": int(base_features.get("days_since_harvest", 0)) + extra_days}
+            out = self.predict_gp(features)
+            timeline.append(
+                {
+                    "storage_days": features["days_since_harvest"],
+                    "predicted_gp_percent": out["predicted_gp_percent"],
+                    "pass_fail": out["pass_fail"],
+                }
+            )
+
+        current_gp = timeline[0]["predicted_gp_percent"] if timeline else 0
+        quality_status = "PASS" if current_gp >= 70 else "FAIL"
+        final_gp = timeline[-1]["predicted_gp_percent"] if timeline else current_gp
+        decay = round(current_gp - final_gp, 1)
+
+        recommendations = [
+            "Keep storage temperature between 15C and 20C.",
+            "Keep storage humidity between 40% and 55%.",
+            "Target seed moisture below 10% for long storage.",
+        ]
+        if decay >= 10:
+            recommendations.append("Shelf-life decay is high; schedule dispatch sooner or re-test monthly.")
+        if quality_status == "FAIL":
+            recommendations.append("Current GP is below release threshold; perform confirmatory germination test.")
+
+        return {
+            "current_gp_percent": round(current_gp, 1),
+            "quality_status": quality_status,
+            "timeline": timeline,
+            "recommendations": recommendations,
+        }
 
     def predict_image_defect(self, image_bytes: bytes) -> dict:
         try:

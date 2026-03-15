@@ -42,6 +42,16 @@ export const seedsAPI = {
   getImageReport: (logId) => api.get(`/api/seeds/image-history/${encodeURIComponent(logId)}/report`),
   getStats: () => api.get('/api/seeds/stats'),
   getGPTrend: () => api.get('/api/seeds/gp-trend'),
+  ingestIotData: (data) => api.post('/api/seeds/iot/ingest', data),
+  getLatestIotData: (deviceId) => api.get('/api/seeds/iot/latest', { params: deviceId ? { device_id: deviceId } : {} }),
+  getIotHistory: (params) => api.get('/api/seeds/iot/history', { params }),
+  ingestChamberAReading: (data) => api.post('/api/seeds/iot/chamber-a/readings', data),
+  getLatestChamberAReading: (deviceId) => api.get('/api/seeds/iot/chamber-a/latest', { params: deviceId ? { device_id: deviceId } : {} }),
+  getChamberAHistory: (params) => api.get('/api/seeds/iot/chamber-a/history', { params }),
+  ingestChamberBImage: (data) => api.post('/api/seeds/iot/chamber-b/images', data),
+  getLatestChamberBImage: (deviceId) => api.get('/api/seeds/iot/chamber-b/latest', { params: deviceId ? { device_id: deviceId } : {} }),
+  getChamberBHistory: (params) => api.get('/api/seeds/iot/chamber-b/history', { params }),
+  forecastGP: (data) => api.post('/api/seeds/forecast', data),
 };
 
 export const dashboardAPI = {

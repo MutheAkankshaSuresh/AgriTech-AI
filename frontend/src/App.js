@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import { authAPI, seedsAPI, dashboardAPI, alertsAPI, waterAPI, precisionAPI, climateAPI } from './utils/api';
 
-// ─── MOCK DATA (replace with real API calls) ───────────────────────────────
+// ---------------- MOCK DATA (replace with real API calls) ----------------
 const MOCK_STATS = {
   total_batches: 247,
   passed_batches: 198,
@@ -52,14 +52,14 @@ const MOCK_CROP_STATS = [
 ];
 
 const MOCK_ALERTS = [
-  { alert_id: 'ALT-001', module: 'SeedQuality', severity: 'Critical', title: 'Batch GP Below Threshold', message: 'Batch BATCH-2024-COT-004 predicted GP is 58% — below 70% minimum. Immediate review required.', linked_entity_id: 'BATCH-2024-COT-004', status: 'Open', created_at: new Date(Date.now()-3600000).toISOString() },
+  { alert_id: 'ALT-001', module: 'SeedQuality', severity: 'Critical', title: 'Batch GP Below Threshold', message: 'Batch BATCH-2024-COT-004 predicted GP is 58% - below 70% minimum. Immediate review required.', linked_entity_id: 'BATCH-2024-COT-004', status: 'Open', created_at: new Date(Date.now()-3600000).toISOString() },
   { alert_id: 'ALT-002', module: 'SeedQuality', severity: 'Critical', title: 'Severe Shriveling Detected', message: 'Batch BATCH-2024-CHI-009 shows 73% shriveled seeds in image analysis. Recommend reject.', linked_entity_id: 'BATCH-2024-CHI-009', status: 'Open', created_at: new Date(Date.now()-7200000).toISOString() },
-  { alert_id: 'ALT-003', module: 'SeedQuality', severity: 'Warning', title: 'High Moisture Detected', message: 'Batch BATCH-2024-BAJ-012 moisture at 12.4% — above safe threshold of 11%. Check storage conditions.', linked_entity_id: 'BATCH-2024-BAJ-012', status: 'Open', created_at: new Date(Date.now()-14400000).toISOString() },
+  { alert_id: 'ALT-003', module: 'SeedQuality', severity: 'Warning', title: 'High Moisture Detected', message: 'Batch BATCH-2024-BAJ-012 moisture at 12.4% - above safe threshold of 11%. Check storage conditions.', linked_entity_id: 'BATCH-2024-BAJ-012', status: 'Open', created_at: new Date(Date.now()-14400000).toISOString() },
   { alert_id: 'ALT-004', module: 'SeedQuality', severity: 'Warning', title: 'Aging Batch Detected', message: 'Batch BATCH-2024-COT-002 is 187 days since harvest. Recommend priority dispatch or re-test.', status: 'Open', created_at: new Date(Date.now()-86400000).toISOString() },
   { alert_id: 'ALT-005', module: 'SeedQuality', severity: 'Info', title: 'Batch Approved', message: 'Batch BATCH-2024-TOM-003 passed QC with 91% predicted GP and 0.94 confidence.', status: 'Resolved', created_at: new Date(Date.now()-172800000).toISOString() },
 ];
 
-// ─── STYLES ────────────────────────────────────────────────────────────────
+// ---------------- STYLES ----------------
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
@@ -192,7 +192,14 @@ const styles = `
     border-color: #7ab48a;
   }
 
-  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-icon {
+    font-size: 10px;
+    width: 48px;
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+  }
 
   .nav-badge {
     margin-left: auto;
@@ -420,7 +427,9 @@ const styles = `
     border-radius: 12px;
     display: grid;
     place-items: center;
-    font-size: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
     background: var(--module-accent-soft);
     border: 1px solid var(--module-accent-border);
     color: var(--module-accent);
@@ -1188,14 +1197,14 @@ const styles = `
   .theme-alerts .table-card { background: rgba(45, 32, 23, 0.95); }
 `;
 
-// ─── COMPONENTS ────────────────────────────────────────────────────────────
+// ---------------- COMPONENTS ----------------
 
 function Toast({ toasts }) {
   return (
     <div className="toast-container">
       {toasts.map(t => (
         <div key={t.id} className={`toast ${t.type}`}>
-          <span>{t.type === 'success' ? '✅' : t.type === 'error' ? '❌' : 'ℹ️'}</span>
+          <span>{t.type === 'success' ? 'SUCCESS' : t.type === 'error' ? 'ERROR' : 'INFO'}</span>
           {t.message}
         </div>
       ))}
@@ -1622,7 +1631,7 @@ function ReportModal({ open, onClose, reportContext }) {
   );
 }
 
-// ─── LOGIN PAGE ─────────────────────────────────────────────────────────────
+// ---------------- LOGIN PAGE ----------------
 
 function LoginPage({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -1661,11 +1670,11 @@ function LoginPage({ onLogin }) {
           </div>
           <div className="form-group">
             <label>Password</label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required />
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="password" required />
           </div>
           {error && <div style={{ color: '#ef4444', fontSize: 12, textAlign: 'center' }}>{error}</div>}
           <button className="btn btn-primary" type="submit" disabled={loading} style={{ width: '100%', padding: '12px' }}>
-            {loading ? <><span className="loader" /> Authenticating...</> : '→ Sign In'}
+            {loading ? <><span className="loader" /> Authenticating...</> : 'Sign In'}
           </button>
         </form>
         <div className="demo-chips">
@@ -1685,12 +1694,12 @@ function LoginPage({ onLogin }) {
   );
 }
 
-// ─── DASHBOARD PAGE ─────────────────────────────────────────────────────────
+// ---------------- DASHBOARD PAGE ----------------
 
 function DashboardPage({ refreshKey, addToast }) {
   const [stats, setStats] = useState(null);
   const [trend, setTrend] = useState([]);
-  const [cropStats, setCropStats] = useState([]);
+  const [batchRows, setBatchRows] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -1705,29 +1714,14 @@ function DashboardPage({ refreshKey, addToast }) {
 
         const rows = (batchesData?.batches || []).slice();
         rows.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        setBatchRows(rows);
         const latest = rows.slice(-20);
         setTrend(latest.map((b) => ({
           batch_id: b.batch_id,
           gp: Number(b?.ai_prediction?.predicted_gp_percent || 0),
-          date: new Date(b.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }),
+          crop_type: b.crop_type || 'Unknown',
+          status: b.status || 'Unknown',
           pass_fail: b?.ai_prediction?.pass_fail || 'NA'
-        })));
-
-        const byCrop = {};
-        rows.forEach((b) => {
-          const key = b.crop_type || 'Unknown';
-          if (!byCrop[key]) byCrop[key] = { _id: key, total: 0, passed: 0, failed: 0, gpSum: 0 };
-          byCrop[key].total += 1;
-          if (b.status === 'Approved') byCrop[key].passed += 1;
-          if (b.status === 'Rejected') byCrop[key].failed += 1;
-          byCrop[key].gpSum += Number(b?.ai_prediction?.predicted_gp_percent || 0);
-        });
-        setCropStats(Object.values(byCrop).map((c) => ({
-          _id: c._id,
-          total: c.total,
-          passed: c.passed,
-          failed: c.failed,
-          avg_gp: c.total ? Number((c.gpSum / c.total).toFixed(1)) : 0
         })));
       } catch (error) {
         addToast(error?.response?.data?.detail || 'Failed to load dashboard', 'error');
@@ -1746,71 +1740,118 @@ function DashboardPage({ refreshKey, addToast }) {
     pending_batches: 0,
     avg_gp_percent: 0,
     total_inventory_kg: 0,
-    critical_alerts: 0
+    critical_alerts: 0,
+    iot_readings_today: 0,
+    chamber_a_readings_today: 0,
+    manual_entries_today: 0,
+    last_device_sync: null
   };
-  const passRate = safeStats.total_batches ? ((safeStats.passed_batches / safeStats.total_batches) * 100).toFixed(1) : '0.0';
-  const pieData = [
+
+  const passRate = safeStats.total_batches
+    ? Math.round((safeStats.passed_batches / safeStats.total_batches) * 100)
+    : 0;
+  const statusPieData = [
     { name: 'Approved', value: safeStats.passed_batches, color: '#22c55e' },
-    { name: 'Rejected', value: safeStats.failed_batches, color: '#ef4444' },
-    { name: 'Pending', value: safeStats.pending_batches, color: '#eab308' },
+    { name: 'Rejected', value: safeStats.failed_batches, color: '#ef4444' }
   ];
+
+  const cropAccumulator = batchRows.reduce((acc, b) => {
+    const crop = b.crop_type || 'Unknown';
+    if (!acc[crop]) {
+      acc[crop] = { crop, approved: 0, failed: 0, gp_total: 0, gp_count: 0 };
+    }
+    const passFail = b?.ai_prediction?.pass_fail || 'NA';
+    const isApproved = b.status === 'Approved' || passFail === 'PASS';
+    const isFailed = b.status === 'Rejected' || passFail === 'FAIL';
+    if (isApproved) acc[crop].approved += 1;
+    if (isFailed) acc[crop].failed += 1;
+    const gp = Number(b?.ai_prediction?.predicted_gp_percent || 0);
+    if (Number.isFinite(gp)) {
+      acc[crop].gp_total += gp;
+      acc[crop].gp_count += 1;
+    }
+    return acc;
+  }, {});
+
+  const cropBarDataRaw = Object.values(cropAccumulator).map((row) => ({
+    crop: row.crop,
+    approved: row.approved,
+    failed: row.failed,
+    avg_gp: row.gp_count ? Math.round(row.gp_total / row.gp_count) : 0
+  }));
+  const cropBarData = cropBarDataRaw.length
+    ? cropBarDataRaw
+    : [{ crop: 'No Data', approved: 0, failed: 0, avg_gp: 0 }];
+
+  const renderCropTooltip = ({ active, payload, label }) => {
+    if (!active || !payload?.length) return null;
+    const data = payload[0]?.payload || {};
+    return (
+      <div style={{ background: '#0f261c', border: '1px solid #2d6a4a', borderRadius: 8, padding: '8px 10px', color: '#e8f7ee' }}>
+        <div style={{ fontWeight: 600, marginBottom: 6 }}>{label}</div>
+        <div>Approved: {data.approved ?? 0}</div>
+        <div>Failed: {data.failed ?? 0}</div>
+        <div>Avg GP: {data.avg_gp ?? 0}%</div>
+      </div>
+    );
+  };
 
   return (
     <>
       <div className="stat-grid">
-        <StatCard label="Total Batches" value={safeStats.total_batches} type="green" icon="📦" sub="From MongoDB" />
-        <StatCard label="Pass Rate" value={`${passRate}%`} type="green" icon="✅" sub={`${safeStats.passed_batches} batches approved`} />
-        <StatCard label="Failed Batches" value={safeStats.failed_batches} type="red" icon="⚠️" sub="Below 70% GP threshold" />
-        <StatCard label="Avg GP Score" value={`${safeStats.avg_gp_percent}%`} type="blue" icon="🌱" sub="Target: >= 80%" />
+        <StatCard label="Total Batches" value={safeStats.total_batches} type="blue" icon="BATCH" sub="Batch registry" />
+        <StatCard label="Pass Rate" value={`${passRate}%`} type="green" icon="PASS" sub="Quality performance" />
+        <StatCard label="Failed Batches" value={safeStats.failed_batches} type="red" icon="FAIL" sub="Rejected batches" />
+        <StatCard label="Avg GP Score" value={`${safeStats.avg_gp_percent}%`} type="blue" icon="GP" sub="Predicted GP" />
       </div>
+
       <div className="stat-grid">
-        <StatCard label="Inventory (kg)" value={`${(safeStats.total_inventory_kg / 1000).toFixed(1)}T`} type="yellow" icon="🏭" sub="Across all warehouses" />
-        <StatCard label="Critical Alerts" value={safeStats.critical_alerts} type="red" icon="🚨" sub="Requires immediate action" />
-        <StatCard label="Pending Review" value={safeStats.pending_batches} type="yellow" icon="🔬" sub="Awaiting lab verification" />
-        <StatCard label="Models Active" value="2" type="green" icon="🤖" sub="GP Predictor + Defect CNN" />
+        <StatCard label="Inventory" value={`${Math.round(safeStats.total_inventory_kg)} kg`} type="blue" icon="INV" sub="Available stock" />
+        <StatCard label="Critical Alerts" value={safeStats.critical_alerts} type="red" icon="ALRT" sub="Open critical alerts" />
+        <StatCard label="Model Status" value="Active" type="green" icon="SYNC" sub="CNN, GP Predictor, MLP, YOLOv8" />
       </div>
 
       <div className="chart-grid">
         <div className="chart-card">
           <div className="chart-header">
             <div>
-              <div className="chart-title">GP Trend - Last 20 Batches</div>
-              <div className="chart-sub">Predicted Germination Percentage over time</div>
+              <div className="chart-title">Batch Outcome Trend</div>
+              <div className="chart-sub">Predicted GP across recent batches</div>
             </div>
-            <span className="chart-badge">Live</span>
           </div>
-          <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={trend}>
-              <defs>
-                <linearGradient id="gpGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e2e1e" />
-              <XAxis dataKey="date" tick={{ fill: '#5a785a', fontSize: 10 }} />
-              <YAxis domain={[50, 100]} tick={{ fill: '#5a785a', fontSize: 10 }} />
-              <Tooltip contentStyle={{ background: '#0f261c', border: '1px solid #2d6a4a', borderRadius: 8, color: '#e8f7ee' }} labelStyle={{ color: '#c6e7d2' }} itemStyle={{ color: '#e8f7ee' }} />
-              <Line type="monotone" dataKey="gp" stroke="#22c55e" strokeWidth={2} dot={{ fill: '#22c55e', r: 3 }} />
-              <Area type="monotone" dataKey="gp" stroke="none" fill="url(#gpGrad)" />
-            </AreaChart>
-          </ResponsiveContainer>
+          {trend.length ? (
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={trend}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e2e1e" />
+                <XAxis dataKey="batch_id" tick={{ fill: '#5a785a', fontSize: 10 }} interval={0} />
+                <YAxis domain={[0, 100]} tick={{ fill: '#5a785a', fontSize: 10 }} />
+                <Tooltip contentStyle={{ background: '#0f261c', border: '1px solid #2d6a4a', borderRadius: 8, color: '#e8f7ee' }} labelStyle={{ color: '#c6e7d2' }} itemStyle={{ color: '#e8f7ee' }} />
+                <Line type="monotone" dataKey="gp" stroke="#22c55e" strokeWidth={3} dot={{ r: 3, fill: '#22c55e' }} name="Predicted GP %" />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ padding: '36px 12px', textAlign: 'center', color: '#5a785a', fontSize: 12 }}>
+              No recent batch trend available yet.
+            </div>
+          )}
         </div>
 
         <div className="chart-card">
           <div className="chart-header">
             <div>
-              <div className="chart-title">Batch Status</div>
-              <div className="chart-sub">Current distribution</div>
+              <div className="chart-title">Batch Approval Share</div>
+              <div className="chart-sub">Approved vs failed batches</div>
             </div>
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={90} paddingAngle={3} dataKey="value">
-                {pieData.map((entry, i) => <Cell key={i} fill={entry.color} stroke="none" />)}
+              <Pie data={statusPieData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={85} paddingAngle={4}>
+                {statusPieData.map((entry) => (
+                  <Cell key={entry.name} fill={entry.color} />
+                ))}
               </Pie>
               <Tooltip contentStyle={{ background: '#0f261c', border: '1px solid #2d6a4a', borderRadius: 8, color: '#e8f7ee' }} labelStyle={{ color: '#c6e7d2' }} itemStyle={{ color: '#e8f7ee' }} />
-              <Legend formatter={v => <span style={{ color: '#def4e6', fontSize: 12, fontWeight: 600 }}>{v}</span>} />
+              <Legend verticalAlign="bottom" height={24} />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -1820,26 +1861,26 @@ function DashboardPage({ refreshKey, addToast }) {
         <div className="chart-header">
           <div>
             <div className="chart-title">Crop-wise Performance</div>
-            <div className="chart-sub">Avg GP% and failed count per crop type</div>
+            <div className="chart-sub">Approved and failed batches by crop</div>
           </div>
         </div>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={cropStats} barSize={28}>
+        <ResponsiveContainer width="100%" height={260}>
+          <BarChart data={cropBarData} margin={{ top: 10, right: 12, left: 0, bottom: 0 }} barCategoryGap={22} barGap={6}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1e2e1e" />
-            <XAxis dataKey="_id" tick={{ fill: '#5a785a', fontSize: 11 }} />
-            <YAxis domain={[0, 100]} tick={{ fill: '#5a785a', fontSize: 10 }} />
-            <Tooltip contentStyle={{ background: '#0f261c', border: '1px solid #2d6a4a', borderRadius: 8, color: '#e8f7ee' }} labelStyle={{ color: '#c6e7d2' }} itemStyle={{ color: '#e8f7ee' }} />
-            <Bar dataKey="avg_gp" fill="#22c55e" radius={[4, 4, 0, 0]} name="Avg GP %" />
-            <Bar dataKey="failed" fill="#ef4444" radius={[4, 4, 0, 0]} name="Failed Batches" />
+            <XAxis dataKey="crop" tick={{ fill: '#5a785a', fontSize: 11 }} />
+            <YAxis tick={{ fill: '#5a785a', fontSize: 10 }} />
+            <Tooltip content={renderCropTooltip} />
+            <Legend verticalAlign="bottom" height={24} />
+            <Bar dataKey="approved" fill="#22c55e" radius={[6, 6, 0, 0]} barSize={10} minPointSize={2} />
+            <Bar dataKey="failed" fill="#ef4444" radius={[6, 6, 0, 0]} barSize={10} minPointSize={2} />
           </BarChart>
         </ResponsiveContainer>
       </div>
+
       {loading && <div className="chart-sub" style={{ marginTop: -12, marginBottom: 16 }}>Refreshing dashboard data...</div>}
     </>
   );
 }
-
-// ─── BATCHES PAGE ─────────────────────────────────────────────────────────
 
 function BatchesPage({ addToast, onBatchCreated }) {
   const [filter, setFilter] = useState('All');
@@ -2188,10 +2229,10 @@ function BatchesPage({ addToast, onBatchCreated }) {
                     {b.ai_prediction?.defect_class === 'Pending Image Analysis' ? 'Analyze Image' : 'Re-analyze'}
                   </button>
                   <button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={(e) => { e.preventDefault(); e.stopPropagation(); openBatchReport(b); }}>
-                    👁
+                    View
                   </button>
                   <button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete batch" onClick={(e) => { e.preventDefault(); e.stopPropagation(); deleteBatch(b.batch_id); }}>
-                    🗑️
+                    Delete
                   </button>
                 </td>
               </tr>
@@ -2203,6 +2244,139 @@ function BatchesPage({ addToast, onBatchCreated }) {
   );
 }
 
+
+// ---------------- CHAMBER 1 PAGE ----------------
+
+function ChamberOnePage({ refreshKey, addToast }) {
+  const [latest, setLatest] = useState(null);
+  const [series, setSeries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [lastFetchAt, setLastFetchAt] = useState(null);
+  const [fetchError, setFetchError] = useState('');
+  const esp32DataUrl = 'http://172.20.161.218/data';
+
+  useEffect(() => {
+    let isMounted = true;
+    const parseHtmlPayload = (html) => {
+      const tempMatch = html.match(/Temperature:\s*([0-9.]+)/i);
+      const humMatch = html.match(/Humidity:\s*([0-9.]+)/i);
+      const soilMatch = html.match(/Soil Moisture:\s*([0-9.]+)/i);
+      return {
+        temperature: Number(tempMatch?.[1] || 0),
+        humidity: Number(humMatch?.[1] || 0),
+        soilMoisture: Number(soilMatch?.[1] || 0),
+      };
+    };
+
+    const fetchEsp32 = async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      try {
+        const res = await fetch(esp32DataUrl, { cache: 'no-store', signal: controller.signal });
+        if (!res.ok) throw new Error('ESP32 not reachable');
+        const contentType = res.headers.get('content-type') || '';
+        let payload;
+        if (contentType.includes('application/json')) {
+          const data = await res.json();
+          payload = {
+            temperature: Number(data.temperature ?? data.temp ?? 0),
+            humidity: Number(data.humidity ?? 0),
+            soilMoisture: Number(data.soilMoisture ?? data.moisture ?? data.soil ?? 0),
+          };
+        } else {
+          const html = await res.text();
+          payload = parseHtmlPayload(html);
+        }
+        if (!isMounted) return;
+        setLatest(payload);
+        setSeries(prev => {
+          const next = [...prev, { ...payload, ts: Date.now() }];
+          return next.slice(-30);
+        });
+        setLastFetchAt(Date.now());
+        setFetchError('');
+      } catch {
+        if (!isMounted) return;
+        const isHttps = window.location.protocol === 'https:';
+        const mixedContent = isHttps && esp32DataUrl.startsWith('http://');
+        setFetchError(mixedContent
+          ? 'Live feed blocked by browser (HTTPS page trying HTTP device). Open app in HTTP or enable HTTPS on ESP32.'
+          : 'Waiting for ESP32 data (check WiFi + CORS on ESP32).');
+      } finally {
+        clearTimeout(timeoutId);
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchEsp32();
+    const intervalId = setInterval(fetchEsp32, 5000);
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, [esp32DataUrl, refreshKey]);
+
+  const temp = Number(latest?.temperature || 0);
+  const humidity = Number(latest?.humidity || 0);
+  const moisture = Number(latest?.soilMoisture || 0);
+  const lastCaptureTs = lastFetchAt || 0;
+  const isLive = lastCaptureTs > 0 && Date.now() - lastCaptureTs <= 2 * 60 * 1000;
+
+  const storageSeries = series.map((r, idx) => ({
+    idx: idx + 1,
+    label: new Date(r.ts).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+    temperature: Number(r.temperature || 0),
+    humidity: Number(r.humidity || 0),
+    moisture: Number(r.soilMoisture || 0)
+  }));
+
+  return (
+    <>
+      <div className="stat-grid">
+        <StatCard label="Temperature" value={`${temp.toFixed(1)} C`} type="blue" icon="TEMP" sub="Live sensor feed" />
+        <StatCard label="Humidity" value={`${humidity.toFixed(1)} %`} type="blue" icon="HUM" sub="Live sensor feed" />
+        <StatCard label="Soil Moisture" value={`${moisture.toFixed(1)} %`} type="yellow" icon="MOIS" sub="Live sensor feed" />
+        <StatCard label="Live Status" value={isLive ? 'Live' : 'Waiting'} type="blue" icon="SYNC" sub={fetchError || 'ESP32 feed'} />
+      </div>
+
+      <div className="stat-grid">
+        <StatCard label="Last Capture" value={lastFetchAt ? new Date(lastFetchAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '00:00'} type="blue" icon="SYNC" sub={lastFetchAt ? new Date(lastFetchAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : 'No data yet'} />
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 20 }}>
+        <div className="chart-card">
+          <div className="chart-header">
+            <div>
+              <div className="chart-title">Live Chamber 1 Signals</div>
+              <div className="chart-sub">Continuous temperature, humidity, and moisture feed</div>
+            </div>
+            <span className="chart-badge">{isLive ? 'Live' : 'Waiting'}</span>
+          </div>
+          {storageSeries.length ? (
+            <ResponsiveContainer width="100%" height={240}>
+              <LineChart data={storageSeries}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e2e1e" />
+                <XAxis dataKey="label" tick={{ fill: '#5a785a', fontSize: 10 }} />
+                <YAxis tick={{ fill: '#5a785a', fontSize: 10 }} />
+                <Tooltip contentStyle={{ background: '#0f261c', border: '1px solid #2d6a4a', borderRadius: 8, color: '#e8f7ee' }} labelStyle={{ color: '#c6e7d2' }} itemStyle={{ color: '#e8f7ee' }} />
+                <Line type="monotone" dataKey="temperature" stroke="#22c55e" strokeWidth={2} dot={false} name="Temperature C" />
+                <Line type="monotone" dataKey="humidity" stroke="#3b82f6" strokeWidth={2} dot={false} name="Humidity %" />
+                <Line type="monotone" dataKey="moisture" stroke="#f59e0b" strokeWidth={2} dot={false} name="Seed Moisture %" />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ padding: '36px 12px', textAlign: 'center', color: '#5a785a', fontSize: 12 }}>
+              {fetchError || 'Waiting for ESP32 feed...'}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {loading && <div className="chart-sub" style={{ marginTop: -12, marginBottom: 16 }}>Connecting to ESP32 feed...</div>}
+    </>
+  );
+}
+
 // ─── PREDICT PAGE ─────────────────────────────────────────────────────────
 
 function PredictPage({ addToast }) {
@@ -2210,6 +2384,9 @@ function PredictPage({ addToast }) {
   const [form, setForm] = useState({
     batch_id: '',
     crop_type: 'Cotton',
+    input_source: 'manual',
+    device_id: '',
+    iot_reading_id: '',
     moisture_percent: '',
     thousand_seed_weight_g: '',
     physical_purity_percent: '',
@@ -2221,11 +2398,18 @@ function PredictPage({ addToast }) {
   const [result, setResult] = useState(null);
   const [dragOver, setDragOver] = useState(false);
   const [imageBatchId, setImageBatchId] = useState('');
+  const [imageIotDeviceId, setImageIotDeviceId] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imageResult, setImageResult] = useState(null);
   const [predictionHistory, setPredictionHistory] = useState([]);
   const [imageHistory, setImageHistory] = useState([]);
   const [historyReport, setHistoryReport] = useState(null);
+  const [prefillingIot, setPrefillingIot] = useState(false);
+  const [fetchingIotImage, setFetchingIotImage] = useState(false);
+  const [iotHistory, setIotHistory] = useState([]);
+  const [loadingIotHistory, setLoadingIotHistory] = useState(false);
+  const [iotDeviceFilter, setIotDeviceFilter] = useState('');
+  const [selectedIotInfo, setSelectedIotInfo] = useState(null);
 
   const loadHistory = useCallback(async () => {
     try {
@@ -2244,6 +2428,42 @@ function PredictPage({ addToast }) {
     loadHistory();
   }, [loadHistory]);
 
+  const loadIotHistory = useCallback(async (deviceId = '') => {
+    try {
+      setLoadingIotHistory(true);
+      const params = { page: 1, limit: 20 };
+      if (deviceId && deviceId.trim()) params.device_id = deviceId.trim();
+      const { data } = await seedsAPI.getIotHistory(params);
+      setIotHistory(data?.records || []);
+    } catch {
+      setIotHistory([]);
+    } finally {
+      setLoadingIotHistory(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadIotHistory();
+  }, [loadIotHistory]);
+
+  const prefillPredictFromIot = async () => {
+    try {
+      setPrefillingIot(true);
+      const { data } = await seedsAPI.getLatestIotData(form.device_id.trim() || undefined);
+      const reading = data?.reading;
+      if (!reading) {
+        addToast('No IoT reading found for this device', 'error');
+        return;
+      }
+      applyIotReadingToPredictor(reading);
+      addToast('IoT values loaded for prediction', 'success');
+    } catch (error) {
+      addToast(error?.response?.data?.detail || 'Failed to fetch IoT reading', 'error');
+    } finally {
+      setPrefillingIot(false);
+    }
+  };
+
   const handlePredict = async (e) => {
     e.preventDefault();
     try {
@@ -2251,6 +2471,9 @@ function PredictPage({ addToast }) {
       const payload = {
         batch_id: form.batch_id.trim() || null,
         crop_type: form.crop_type,
+        input_source: form.input_source,
+        device_id: form.input_source === 'iot' ? (form.device_id.trim() || null) : null,
+        iot_reading_id: form.input_source === 'iot' ? (form.iot_reading_id || null) : null,
         moisture_percent: parseFloat(form.moisture_percent),
         thousand_seed_weight_g: parseFloat(form.thousand_seed_weight_g),
         physical_purity_percent: parseFloat(form.physical_purity_percent),
@@ -2276,6 +2499,91 @@ function PredictPage({ addToast }) {
     if (file && file.type.startsWith('image/')) {
       setImageFile(file);
       analyzeImage(file);
+    }
+  };
+
+  const base64ToFile = (rawBase64, filename = 'iot-capture.jpg', contentType = 'image/jpeg') => {
+    const pureBase64 = rawBase64.includes(',') ? rawBase64.split(',')[1] : rawBase64;
+    const binaryString = atob(pureBase64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i += 1) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    const blob = new Blob([bytes], { type: contentType });
+    return new File([blob], filename, { type: contentType });
+  };
+
+
+  const applyIotReadingToPredictor = (reading) => {
+    const sensor = reading?.sensor_payload || {};
+    setForm((prev) => ({
+      ...prev,
+      input_source: 'iot',
+      iot_reading_id: reading?.id || prev.iot_reading_id,
+      device_id: reading?.device_id || prev.device_id,
+      batch_id: reading?.batch_id || prev.batch_id,
+      crop_type: reading?.crop_type || prev.crop_type,
+      moisture_percent: reading?.moisture_percent ?? sensor?.moisture_percent ?? prev.moisture_percent,
+      storage_temperature_c: reading?.temperature_c ?? sensor?.temperature_c ?? prev.storage_temperature_c,
+      storage_humidity_percent: reading?.humidity_percent ?? sensor?.humidity_percent ?? prev.storage_humidity_percent,
+      thousand_seed_weight_g: reading?.thousand_seed_weight_g ?? sensor?.thousand_seed_weight_g ?? sensor?.seed_weight_g ?? prev.thousand_seed_weight_g,
+      physical_purity_percent: reading?.physical_purity_percent ?? sensor?.physical_purity_percent ?? prev.physical_purity_percent,
+      days_since_harvest: reading?.days_since_harvest ?? sensor?.days_since_harvest ?? prev.days_since_harvest,
+    }));
+    setImageIotDeviceId(reading?.device_id || '');
+    if (reading?.batch_id) setImageBatchId(reading.batch_id);
+    setSelectedIotInfo({
+      id: reading?.id || null,
+      device_id: reading?.device_id || 'unknown-device',
+      batch_id: reading?.batch_id || null,
+      captured_at: reading?.captured_at || reading?.created_at || null,
+    });
+  };
+
+  const extractImageFileFromReading = (reading) => {
+    const imageBase64 = reading?.image_base64 || reading?.sensor_payload?.image_base64;
+    if (!imageBase64) return null;
+    const imageName = reading?.image_name || `iot-${reading?.device_id || 'camera'}-${Date.now()}.jpg`;
+    const imageType = reading?.image_content_type || 'image/jpeg';
+    return base64ToFile(imageBase64, imageName, imageType);
+  };
+
+  const useIotReading = async (reading, analyzeImageNow = false) => {
+    applyIotReadingToPredictor(reading);
+    const imageFromReading = extractImageFileFromReading(reading);
+    if (imageFromReading) {
+      setImageFile(imageFromReading);
+      if (analyzeImageNow) {
+        await analyzeImage(imageFromReading);
+      }
+    }
+    addToast(analyzeImageNow ? 'IoT reading applied and image analyzed' : 'IoT reading applied to predictor', 'success');
+  };
+
+  const fetchIotImageForAnalysis = async () => {
+    try {
+      setFetchingIotImage(true);
+      const { data } = await seedsAPI.getLatestIotData(imageIotDeviceId.trim() || undefined);
+      const reading = data?.reading;
+      if (!reading) {
+        addToast('No IoT reading found for this device', 'error');
+        return;
+      }
+
+      const file = extractImageFileFromReading(reading);
+      if (!file) {
+        addToast('Latest IoT reading has no image payload', 'error');
+        return;
+      }
+      applyIotReadingToPredictor(reading);
+      setImageFile(file);
+      await analyzeImage(file);
+      addToast(`IoT image fetched from ${reading?.device_id || 'device'} and analyzed`, 'success');
+    } catch (error) {
+      addToast(error?.response?.data?.detail || 'Failed to fetch IoT image', 'error');
+    } finally {
+      setFetchingIotImage(false);
     }
   };
 
@@ -2305,8 +2613,8 @@ function PredictPage({ addToast }) {
     if (!window.confirm('Delete this prediction?')) return;
     try {
       await seedsAPI.deletePrediction(id);
+      setPredictionHistory((prev) => prev.filter((row) => getRowId(row) !== id));
       addToast('Prediction deleted', 'success');
-      await loadHistory();
     } catch (error) {
       addToast(error?.response?.data?.detail || 'Failed to delete', 'error');
     }
@@ -2320,8 +2628,8 @@ function PredictPage({ addToast }) {
     if (!window.confirm('Delete this image analysis?')) return;
     try {
       await seedsAPI.deleteImageAnalysis(id);
+      setImageHistory((prev) => prev.filter((row) => getRowId(row) !== id));
       addToast('Image analysis deleted', 'success');
-      await loadHistory();
     } catch (error) {
       addToast(error?.response?.data?.detail || 'Failed to delete', 'error');
     }
@@ -2419,10 +2727,46 @@ function PredictPage({ addToast }) {
                 <div>
                   <div className="chart-title">Seed Quality Predictor</div>
                   <div className="chart-sub">Real backend prediction + MongoDB save</div>
+                  {selectedIotInfo && (
+                    <div style={{ marginTop: 8 }}>
+                      <span className="badge" style={{ background: '#1e3a8a22', color: '#93c5fd', border: '1px solid #1d4ed8' }}>
+                        Selected IoT: {selectedIotInfo.device_id}
+                        {selectedIotInfo.batch_id ? ` | ${selectedIotInfo.batch_id}` : ''}
+                        {selectedIotInfo.captured_at ? ` | ${new Date(selectedIotInfo.captured_at).toLocaleString('en-IN')}` : ''}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
               <form onSubmit={handlePredict}>
                 <div className="form-grid" style={{ marginBottom: 16 }}>
+                  <div className="form-group">
+                    <label>Data Source</label>
+                    <select value={form.input_source} onChange={e => setForm({ ...form, input_source: e.target.value })}>
+                      <option value="manual">Manual Entry</option>
+                      <option value="iot">IoT Device</option>
+                    </select>
+                  </div>
+                  <div className="form-group full">
+                    <label>Device ID (optional)</label>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <input
+                        type="text"
+                        placeholder="e.g. ESP32-CHAMBER-01"
+                        value={form.device_id}
+                        onChange={e => setForm({ ...form, device_id: e.target.value })}
+                        disabled={form.input_source !== 'iot'}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline btn-sm"
+                        disabled={form.input_source !== 'iot' || prefillingIot}
+                        onClick={prefillPredictFromIot}
+                      >
+                        {prefillingIot ? 'Fetching...' : 'Fetch IoT'}
+                      </button>
+                    </div>
+                  </div>
                   <div className="form-group full">
                     <label>Batch ID (optional)</label>
                     <input type="text" placeholder="e.g. BATCH-2026-COT-001" value={form.batch_id} onChange={e => setForm({ ...form, batch_id: e.target.value })} />
@@ -2502,6 +2846,64 @@ function PredictPage({ addToast }) {
           <div className="table-card" style={{ marginTop: 20 }}>
             <div className="table-header">
               <div>
+                <div className="chart-title">IoT Reading Selector</div>
+                <div className="chart-sub">Select any IoT record to auto-fill all predictor fields</div>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input
+                  className="input"
+                  type="text"
+                  placeholder="Filter device id"
+                  value={iotDeviceFilter}
+                  onChange={(e) => setIotDeviceFilter(e.target.value)}
+                  style={{ width: 180 }}
+                />
+                <button type="button" className="btn btn-outline btn-sm" onClick={() => loadIotHistory(iotDeviceFilter)}>
+                  Refresh
+                </button>
+              </div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Device</th>
+                  <th>Batch</th>
+                  <th>Crop</th>
+                  <th>Temp</th>
+                  <th>Humidity</th>
+                  <th>Moisture</th>
+                  <th>Image</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {iotHistory.map((r) => (
+                  <tr key={getRowId(r) || r.created_at}>
+                    <td style={{ color: '#5a785a', fontSize: 11 }}>{r?.captured_at ? new Date(r.captured_at).toLocaleString() : '-'}</td>
+                    <td><span className="mono">{r?.device_id || '-'}</span></td>
+                    <td><span className="mono">{r?.batch_id || '-'}</span></td>
+                    <td>{r?.crop_type || '-'}</td>
+                    <td>{r?.temperature_c ?? '-'}</td>
+                    <td>{r?.humidity_percent ?? '-'}</td>
+                    <td>{r?.moisture_percent ?? '-'}</td>
+                    <td>{(r?.image_base64 || r?.sensor_payload?.image_base64) ? 'Yes' : 'No'}</td>
+                    <td style={{ display: 'flex', gap: 6, minWidth: 170 }}>
+                      <button type="button" className="btn btn-outline btn-sm" onClick={() => useIotReading(r, false)}>Use</button>
+                      <button type="button" className="btn btn-primary btn-sm" onClick={() => useIotReading(r, true)}>Use + Analyze</button>
+                    </td>
+                  </tr>
+                ))}
+                {!iotHistory.length && (
+                  <tr><td colSpan={9} style={{ textAlign: 'center', color: '#5a785a' }}>{loadingIotHistory ? 'Loading IoT readings...' : 'No IoT readings found'}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="table-card" style={{ marginTop: 20 }}>
+            <div className="table-header">
+              <div>
                 <div className="chart-title">Recent Tabular Predictions</div>
                 <div className="chart-sub">Latest records from MongoDB</div>
               </div>
@@ -2512,6 +2914,7 @@ function PredictPage({ addToast }) {
                   <th>Time</th>
                   <th>Batch</th>
                   <th>Crop</th>
+                  <th>Source</th>
                   <th>Predicted GP</th>
                   <th>Verdict</th>
                   <th>Report</th>
@@ -2524,17 +2927,18 @@ function PredictPage({ addToast }) {
                     <td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td>
                     <td><span className="mono">{r.batch_id || '-'}</span></td>
                     <td>{r?.input?.crop_type || '-'}</td>
+                    <td>{(r?.input_source || r?.input?.input_source || 'manual').toUpperCase()}</td>
                     <td>{r?.output?.predicted_gp_percent ?? '-'}</td>
                     <td><span className={`badge ${(r?.output?.pass_fail || '').toLowerCase()}`}>{r?.output?.pass_fail || '-'}</span></td>
                     <td style={{ maxWidth: 360, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td>
                     <td style={{ display: 'flex', gap: 6, minWidth: 150 }}>
-                      <button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openPredictionReport(r)}>👁</button>
+                      <button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openPredictionReport(r)}>View</button>
                       <button type="button" className="btn btn-danger btn-sm" title="Delete entry" onClick={() => deletePrediction(getRowId(r))}>Delete</button>
                     </td>
                   </tr>
                 ))}
                 {!predictionHistory.length && (
-                  <tr><td colSpan={7} style={{ textAlign: 'center', color: '#5a785a' }}>No saved predictions yet</td></tr>
+                  <tr><td colSpan={8} style={{ textAlign: 'center', color: '#5a785a' }}>No saved predictions yet</td></tr>
                 )}
               </tbody>
             </table>
@@ -2555,6 +2959,26 @@ function PredictPage({ addToast }) {
               <div style={{ marginBottom: 12 }}>
                 <label style={{ display: 'block', marginBottom: 6, fontSize: 12, color: '#9ab89a' }}>Batch ID (optional)</label>
                 <input className="input" type="text" placeholder="e.g. BATCH-2026-COT-001" value={imageBatchId} onChange={(e) => setImageBatchId(e.target.value)} />
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ display: 'block', marginBottom: 6, fontSize: 12, color: '#9ab89a' }}>IoT Device ID (for ESP32-CAM fetch)</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    className="input"
+                    type="text"
+                    placeholder="e.g. ESP32-CHAMBER-01"
+                    value={imageIotDeviceId}
+                    onChange={(e) => setImageIotDeviceId(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm"
+                    onClick={fetchIotImageForAnalysis}
+                    disabled={fetchingIotImage}
+                  >
+                    {fetchingIotImage ? 'Fetching...' : 'Fetch IoT Image'}
+                  </button>
+                </div>
               </div>
               <div
                 className={`upload-zone ${dragOver ? 'active' : ''}`}
@@ -2638,8 +3062,8 @@ function PredictPage({ addToast }) {
                     <td><span className={`badge ${deriveVerdict('Seed Quality', r?.output).className}`}>{deriveVerdict('Seed Quality', r?.output).label}</span></td>
                     <td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td>
                     <td style={{ display: 'flex', gap: 6 }}>
-                      <button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openImageReport(r)}>👁</button>
-                      <button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deleteImageAnalysis(getRowId(r))}>🗑️</button>
+                      <button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openImageReport(r)}>View</button>
+                      <button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deleteImageAnalysis(getRowId(r))}>Delete</button>
                     </td>
                   </tr>
                 ))}
@@ -2738,7 +3162,7 @@ function AlertsPage({ addToast, refreshKey, onDataChanged }) {
                 {a.status === 'Resolved' && <span className="badge approved">Resolved</span>}
               </div>
               <div className="alert-msg">{a.message}</div>
-              <div className="alert-time">{a.module} • {formatTime(a.created_at)} • {a.alert_id}</div>
+              <div className="alert-time">{a.module} | {formatTime(a.created_at)} | {a.alert_id}</div>
             </div>
             <div className="alert-actions">
               {a.status === 'Open' && (
@@ -2752,13 +3176,13 @@ function AlertsPage({ addToast, refreshKey, onDataChanged }) {
   );
 }
 
-// ─── COMING SOON PAGES ────────────────────────────────────────────────────
+// ---------------- COMING SOON PAGES ----------------
 
 function ComingSoon({ title, icon, features }) {
   return (
     <div className="coming-soon">
       <div className="coming-soon-icon">{icon}</div>
-      <div className="coming-soon-title">{title} — Phase 2</div>
+      <div className="coming-soon-title">{title} - Phase 2</div>
       <div className="coming-soon-sub">This module is in development. Training data collection in progress.</div>
       <div className="roadmap-chips">
         {features.map((f, i) => <span key={i} className="roadmap-chip">{f}</span>)}
@@ -2767,7 +3191,7 @@ function ComingSoon({ title, icon, features }) {
   );
 }
 
-// ─── MAIN APP ─────────────────────────────────────────────────────────────
+// ---------------- MAIN APP ----------------
 
 
 function WaterIntelligencePage({ addToast, refreshKey, onDataChanged }) {
@@ -2917,7 +3341,7 @@ function WaterIntelligencePage({ addToast, refreshKey, onDataChanged }) {
       <div className="table-card" style={{ marginTop: 20 }}>
         <div className="table-header"><div className="chart-title">Recent Water Assessments</div></div>
         <table><thead><tr><th>Time</th><th>Plot</th><th>Crop</th><th>Need (mm)</th><th>Priority</th><th>Verdict</th><th>Report</th><th>Actions</th></tr></thead><tbody>
-          {rows.map(r => <tr key={getRowId(r) || r.created_at}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.plot_id || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.irrigation_need_mm ?? '-'}</td><td>{r?.output?.priority || '-'}</td><td><span className={`badge ${deriveVerdict('Water Intelligence', r?.output).className}`}>{deriveVerdict('Water Intelligence', r?.output).label}</span></td><td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td><td style={{ display: 'flex', gap: 6 }}><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>👁</button><button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deleteWaterEntry(getRowId(r))}>🗑️</button></td></tr>)}
+          {rows.map(r => <tr key={getRowId(r) || r.created_at}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.plot_id || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.irrigation_need_mm ?? '-'}</td><td>{r?.output?.priority || '-'}</td><td><span className={`badge ${deriveVerdict('Water Intelligence', r?.output).className}`}>{deriveVerdict('Water Intelligence', r?.output).label}</span></td><td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td><td style={{ display: 'flex', gap: 6 }}><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>View</button><button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deleteWaterEntry(getRowId(r))}>Delete</button></td></tr>)}
           {!rows.length && <tr><td colSpan={8} style={{ textAlign: 'center', color: '#5a785a' }}>No records yet</td></tr>}
         </tbody></table>
       </div>
@@ -3049,7 +3473,7 @@ function PrecisionFarmingPage({ addToast, refreshKey, onDataChanged }) {
       <div className="table-card" style={{ marginTop: 20 }}>
         <div className="table-header"><div className="chart-title">Recent Precision Runs</div></div>
         <table><thead><tr><th>Time</th><th>Field</th><th>Crop</th><th>Pred Yield</th><th>Risk</th><th>Verdict</th><th>Report</th><th>Actions</th></tr></thead><tbody>
-          {rows.map(r => <tr key={getRowId(r) || r.created_at}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.field_id || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.predicted_seed_output_t_ha ?? '-'}</td><td>{r?.output?.risk_band || '-'}</td><td><span className={`badge ${deriveVerdict('Precision Farming', r?.output).className}`}>{deriveVerdict('Precision Farming', r?.output).label}</span></td><td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td><td style={{ display: 'flex', gap: 6 }}><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>👁</button><button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deletePrecisionEntry(getRowId(r))}>🗑️</button></td></tr>)}
+          {rows.map(r => <tr key={getRowId(r) || r.created_at}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.field_id || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.predicted_seed_output_t_ha ?? '-'}</td><td>{r?.output?.risk_band || '-'}</td><td><span className={`badge ${deriveVerdict('Precision Farming', r?.output).className}`}>{deriveVerdict('Precision Farming', r?.output).label}</span></td><td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td><td style={{ display: 'flex', gap: 6 }}><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>View</button><button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deletePrecisionEntry(getRowId(r))}>Delete</button></td></tr>)}
           {!rows.length && <tr><td colSpan={8} style={{ textAlign: 'center', color: '#5a785a' }}>No records yet</td></tr>}
         </tbody></table>
       </div>
@@ -3181,7 +3605,7 @@ function ClimateResiliencePage({ addToast, refreshKey, onDataChanged }) {
       <div className="table-card" style={{ marginTop: 20 }}>
         <div className="table-header"><div className="chart-title">Recent Climate Assessments</div></div>
         <table><thead><tr><th>Time</th><th>Region</th><th>Crop</th><th>Risk</th><th>Sustainability</th><th>Verdict</th><th>Report</th><th>Actions</th></tr></thead><tbody>
-          {rows.map(r => <tr key={getRowId(r) || r.created_at}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.region || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.climate_risk_score ?? '-'}</td><td>{r?.output?.sustainability_score ?? '-'}</td><td><span className={`badge ${deriveVerdict('Climate Resilience', r?.output).className}`}>{deriveVerdict('Climate Resilience', r?.output).label}</span></td><td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td><td style={{ display: 'flex', gap: 6 }}><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>👁</button><button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deleteClimateEntry(getRowId(r))}>🗑️</button></td></tr>)}
+          {rows.map(r => <tr key={getRowId(r) || r.created_at}><td style={{ color: '#5a785a', fontSize: 11 }}>{new Date(r.created_at).toLocaleString()}</td><td><span className="mono">{r?.output?.region || '-'}</span></td><td>{r?.output?.crop_type || '-'}</td><td>{r?.output?.climate_risk_score ?? '-'}</td><td>{r?.output?.sustainability_score ?? '-'}</td><td><span className={`badge ${deriveVerdict('Climate Resilience', r?.output).className}`}>{deriveVerdict('Climate Resilience', r?.output).label}</span></td><td style={{ maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={getReportSummary(r)}>{getReportSummary(r)}</td><td style={{ display: 'flex', gap: 6 }}><button type="button" className="btn btn-outline btn-sm btn-icon" title="View report" onClick={() => openEntryReport(r)}>View</button><button type="button" className="btn btn-danger btn-sm btn-icon" title="Delete" onClick={() => deleteClimateEntry(getRowId(r))}>Delete</button></td></tr>)}
           {!rows.length && <tr><td colSpan={8} style={{ textAlign: 'center', color: '#5a785a' }}>No records yet</td></tr>}
         </tbody></table>
       </div>
@@ -3228,35 +3652,34 @@ export default function App() {
   if (!user) return <><style>{styles}</style><LoginPage onLogin={setUser} /></>;
 
   const nav = [
-    { section: 'Overview', items: [{ id: 'dashboard', icon: '📊', label: 'Dashboard' }] },
-    { section: 'Seed Quality', items: [
-      { id: 'batches', icon: '📦', label: 'Batch Registry' },
-      { id: 'predict', icon: '🤖', label: 'AI Predictor' },
-    ]},
-    { section: 'Operations Intelligence', items: [
-      { id: 'water', icon: '💧', label: 'Water Intelligence' },
-      { id: 'precision', icon: '🛰️', label: 'Precision Farming' },
-      { id: 'climate', icon: '🌦️', label: 'Climate Resilience' },
-    ]},
-    { section: 'System', items: [
-      { id: 'alerts', icon: '🔔', label: 'Alerts', badge: alertBadge },
+    { section: 'Modules', items: [
+      { id: 'dashboard', icon: 'DASH', label: 'Dashboard' },
+      { id: 'batches', icon: 'BATCH', label: 'Batch Registry' },
+      { id: 'predict', icon: 'AI', label: 'Predictor' },
+      { id: 'chamber1', icon: 'STORE', label: 'Storage Monitoring' },
+      { id: 'water', icon: 'WATER', label: 'Water Intelligence' },
+      { id: 'precision', icon: 'FIELD', label: 'Precision Farming' },
+      { id: 'climate', icon: 'CLIM', label: 'Climate Resilience' },
+      { id: 'alerts', icon: 'ALRT', label: 'Alerts', badge: alertBadge },
     ]}
   ];
 
   const pageTitle = {
-    dashboard: 'Overview Dashboard', batches: 'Batch Registry', predict: 'AI Predictor',
+    dashboard: 'Overview Dashboard', batches: 'Batch Registry', predict: 'Predictor',
+    chamber1: 'Storage Monitoring',
     water: 'Water Intelligence', precision: 'Precision Farming', climate: 'Climate Resilience',
     alerts: 'Alert Center'
   };
 
   const pageMeta = {
-    dashboard: { className: 'theme-dashboard', icon: '📊', sub: 'Farm-wide performance and quality intelligence' },
-    batches: { className: 'theme-batches', icon: '🌾', sub: 'Seed lots, QC status, and batch health tracking' },
-    predict: { className: 'theme-predict', icon: '🧬', sub: 'AI seed quality diagnostics and prevention guidance' },
-    water: { className: 'theme-water', icon: '💧', sub: 'Irrigation intelligence for healthier seed outcomes' },
-    precision: { className: 'theme-precision', icon: '🛰️', sub: 'Field-level precision actions and risk control' },
-    climate: { className: 'theme-climate', icon: '🌦️', sub: 'Climate risk adaptation for resilient seed production' },
-    alerts: { className: 'theme-alerts', icon: '🚨', sub: 'Critical operations signals and action queue' }
+    dashboard: { className: 'theme-dashboard', icon: 'DASH', sub: 'Farm-wide performance and quality intelligence' },
+    batches: { className: 'theme-batches', icon: 'BATCH', sub: 'Seed lots, QC status, and batch health tracking' },
+    predict: { className: 'theme-predict', icon: 'AI', sub: 'AI seed quality diagnostics and prevention guidance' },
+    chamber1: { className: 'theme-dashboard', icon: 'STORE', sub: 'Storage environment sensors and rapid GP prediction' },
+    water: { className: 'theme-water', icon: 'WATER', sub: 'Irrigation intelligence for healthier seed outcomes' },
+    precision: { className: 'theme-precision', icon: 'FIELD', sub: 'Field-level precision actions and risk control' },
+    climate: { className: 'theme-climate', icon: 'CLIM', sub: 'Climate risk adaptation for resilient seed production' },
+    alerts: { className: 'theme-alerts', icon: 'ALRT', sub: 'Critical operations signals and action queue' }
   };
 
   return (
@@ -3291,7 +3714,7 @@ export default function App() {
                 <div className="user-name">{user.name}</div>
                 <div className="user-role">{user.role}</div>
               </div>
-              <span onClick={() => { localStorage.removeItem('token'); setUser(null); }} style={{ marginLeft: 'auto', cursor: 'pointer', color: '#5a785a', fontSize: 14 }}>↩</span>
+              <span onClick={() => { localStorage.removeItem('token'); setUser(null); }} style={{ marginLeft: 'auto', cursor: 'pointer', color: '#5a785a', fontSize: 12 }}>Logout</span>
             </div>
           </div>
         </div>
@@ -3309,7 +3732,7 @@ export default function App() {
 
           <div className={`content module-skin ${pageMeta[page]?.className || 'theme-dashboard'}`}>
             <div className="module-hero">
-              <div className="module-hero-icon">{pageMeta[page]?.icon || '🌱'}</div>
+              <div className="module-hero-icon">{pageMeta[page]?.icon || 'HOME'}</div>
               <div>
                 <div className="module-hero-title">{pageTitle[page]}</div>
                 <div className="module-hero-sub">{pageMeta[page]?.sub || 'AgriTech Intelligence'}</div>
@@ -3318,6 +3741,7 @@ export default function App() {
             {page === 'dashboard' && <DashboardPage refreshKey={refreshKey} addToast={addToast} />}
             {page === 'batches' && <BatchesPage addToast={addToast} onBatchCreated={refreshAll} />}
             {page === 'predict' && <PredictPage addToast={addToast} />}
+            {page === 'chamber1' && <ChamberOnePage refreshKey={refreshKey} addToast={addToast} />}
             {page === 'alerts' && <AlertsPage addToast={addToast} refreshKey={refreshKey} onDataChanged={refreshAll} />}
             {page === 'water' && <WaterIntelligencePage addToast={addToast} refreshKey={refreshKey} onDataChanged={refreshAll} />}
             {page === 'precision' && <PrecisionFarmingPage addToast={addToast} refreshKey={refreshKey} onDataChanged={refreshAll} />}
@@ -3329,5 +3753,6 @@ export default function App() {
     </>
   );
 }
+
 
 
